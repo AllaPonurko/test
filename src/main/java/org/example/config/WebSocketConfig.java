@@ -3,20 +3,24 @@ package org.example.config;
 
 import org.example.websocket.ChatWebSocketHandler;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
-    @EnableWebSocket
-    public class WebSocketConfig implements WebSocketConfigurer {
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-        @Override
-        public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-            registry.addHandler(new ChatWebSocketHandler(), "/chat")
-                    .setAllowedOrigins("*");  // Дозволити всі CORS
-        }
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
 
+        registry.addEndpoint("/test/chat").setAllowedOrigins("http://localhost:3000").withSockJS();
+    }
 
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        config.enableSimpleBroker("/test/topic");
+        config.setApplicationDestinationPrefixes("/test/app");
+    }
 }
 
