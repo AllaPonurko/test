@@ -28,7 +28,7 @@ public class BookService extends BaseService<Book> implements IProductService <B
 
     public BookService(BookRepository bookRepository){
         this.bookRepository=bookRepository;
-        //this.repository = bookRepository;
+        this.repository = bookRepository;
 
     }
     @PostConstruct

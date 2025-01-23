@@ -11,7 +11,7 @@ public class ProductsResponse<T>{
         this.productList = productList;
     }
 
-    public int getUserCount() {
+    public int getProductCount() {
         return productCount;
     }
 

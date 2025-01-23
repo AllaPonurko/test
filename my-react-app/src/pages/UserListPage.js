@@ -6,7 +6,7 @@ const[users,setUsers]=useState([]);
 const[error,setError]=useState(null);
 const fetchUsers=async()=>{
 try{
-const response=await fetch('http://localhost:8080/test/api/user/getUsers');
+const response=await fetch('http://localhost:8082/test/api/user/getUsers');
 if (!response.ok) {
                       throw new Error('Network response was not ok');
                   }

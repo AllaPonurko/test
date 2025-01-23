@@ -1,66 +1,69 @@
 import React, { useState, useEffect } from 'react';
-import { Client } from '@stomp/stompjs';
 
-const ChatAppPage = () => {
+const WebSocketComponent = () => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  let client = null;
+  const [ws, setWs] = useState(null);
 
   useEffect(() => {
-    // Підключення до WebSocket через STOMP
-    client = new Client({
-      brokerURL: 'ws://localhost:8080/test/chat',  // Ваш WebSocket ендпоінт
-      //reconnectDelay: 5000,
-      onConnect: () => {
-        console.log('Connected to WebSocket');
+    const socket = new WebSocket('ws://localhost:8082/test/ws');
 
-        // Підписка на повідомлення від сервера
-        client.subscribe('/topic/messages', (message) => {
-          if (message.body) {
-            setMessages(prevMessages => [...prevMessages, message.body]);
-          }
-        });
-      },
-      onStompError: (frame) => {
-        console.error('Broker reported error: ' + frame.headers['message']);
-        console.error('Additional details: ' + frame.body);
-      },
-    });
+    socket.onopen = () => {
+      console.log('WebSocket connected');
+    };
+    socket.onclose = () => {
+      console.log('WebSocket closed. Reconnecting...');
+      //setTimeout(() => connectWebSocket(), 5000); // Повторне підключення через 5 секунд
+    };
 
-    client.activate();
 
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    // Обробка повідомлень від сервера
+    socket.onmessage = (event) => {
+      console.log('Received:', event.data);
+      setMessages((prevMessages) => [...prevMessages, event.data]);
+    };
+    setWs(socket);
+
+    // Закриття з'єднання при закритті компонента
     return () => {
-      // Закриття з'єднання при закритті компонента
-      if (client) {
-        client.deactivate();
+      if (socket) {
+        socket.close();
+        console.log('WebSocket disconnected');
       }
     };
   }, []);
 
   const sendMessage = () => {
-    if (client && inputMessage.trim()) {
-      client.publish({ destination: '/test/chat', body: inputMessage });
-      setInputMessage('');  // Очищення поля введення після відправки
+    if (ws && ws.readyState === WebSocket.OPEN && inputMessage.trim()) {
+      ws.send(inputMessage);
+      console.log('Sent:', inputMessage);
+      setInputMessage('');
+    } else {
+      console.error('WebSocket is not open');
     }
   };
 
   return (
-    <div>
-      <h2>WebSocket Chat</h2>
-      <div className="messages">
-        {messages.map((message, index) => (
-          <div key={index}>{message}</div>
-        ))}
+      <div>
+        <h2>WebSocket Chat</h2>
+        <div className="messages">
+          {messages.map((message, index) => (
+              <div key={index}>{message}</div>
+          ))}
+        </div>
+        <input
+            type="text"
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            placeholder="Type a message..."
+        />
+        <button onClick={sendMessage}>Send</button>
       </div>
-      <input
-        type="text"
-        value={inputMessage}
-        onChange={(e) => setInputMessage(e.target.value)}
-        placeholder="Type a message..."
-      />
-      <button onClick={sendMessage}>Send</button>
-    </div>
   );
 };
 
-export default ChatAppPage;
+export default WebSocketComponent;
