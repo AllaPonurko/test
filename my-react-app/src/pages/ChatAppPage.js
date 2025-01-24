@@ -6,12 +6,12 @@ const WebSocketComponent = () => {
   const [ws, setWs] = useState(null);
 
   useEffect(() => {
-    const socket = new WebSocket('ws://localhost:8082/test/ws');
+    const socket = new WebSocket('ws://localhost:8082/test/init');
 
     socket.onopen = () => {
       console.log('WebSocket connected');
     };
-    socket.onclose = () => {
+    socket.onclose = (event) => {
       console.log('WebSocket closed. Reconnecting...');
       //setTimeout(() => connectWebSocket(), 5000); // Повторне підключення через 5 секунд
     };
@@ -30,8 +30,8 @@ const WebSocketComponent = () => {
 
     // Закриття з'єднання при закритті компонента
     return () => {
-      if (socket) {
-        socket.close();
+      if (ws) {
+        ws.close();
         console.log('WebSocket disconnected');
       }
     };
