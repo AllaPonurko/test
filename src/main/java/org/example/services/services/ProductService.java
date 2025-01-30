@@ -1,7 +1,7 @@
 package org.example.services.services;
 
 import jakarta.transaction.Transactional;
-import org.example.dto.BaseDTO;
+import org.example.dto.BaseReq;
 import org.example.models.products.Electronics;
 import org.example.repositories.BookRepository;
 import org.example.repositories.ElectronicsRepository;
@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class ProductService<Product> extends BaseService<org.example.models.products.Product> implements IProductService<org.example.models.products.Product,BaseDTO> {
+public class ProductService<Product> extends BaseService<org.example.models.products.Product> implements IProductService<org.example.models.products.Product, BaseReq> {
     @Value("${product.data.file}")
 
     private String productDataFile;
@@ -42,10 +42,10 @@ public class ProductService<Product> extends BaseService<org.example.models.prod
         this.vendorRepository = vendorRepository;
     }
     @Transactional
-    public org.example.models.products.Product createProduct(BaseDTO baseDTO) throws IOException, ClassNotFoundException {
-        if(!baseDTO.name().isEmpty() && !(baseDTO.price() ==0)){
-            org.example.models.products.Product product = new org.example.models.products.Product(baseDTO.name(),baseDTO.price(),
-                    baseDTO.description());
+    public org.example.models.products.Product createProduct(BaseReq baseReq) throws IOException, ClassNotFoundException {
+        if(!baseReq.name().isEmpty() && !(baseReq.price() ==0)){
+            org.example.models.products.Product product = new org.example.models.products.Product(baseReq.name(), baseReq.price(),
+                    baseReq.description());
             product.setAvailable(true);
             try {
                 addEntity( product,productDataFile,  productRepository);

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.dto.UserDTO;
+import org.example.dto.UserReq;
 import org.example.models.User;
 import org.example.repositories.UserRepository;
 import org.jetbrains.annotations.NotNull;
@@ -75,26 +75,26 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean createUser(UserDTO userDTO) {
+    public boolean createUser(UserReq userReq) {
         LOGGER.info("Current users: " + userRepository.count());
-        if(userDTO != null && userDTO.email() != null && userDTO.username() != null) {
-            if(userRepository.findByEmail(userDTO.email()).isPresent()) {
+        if(userReq != null && userReq.email() != null && userReq.username() != null) {
+            if(userRepository.findByEmail(userReq.email()).isPresent()) {
                 return false;
             }
-            User user=new User(userDTO.username(), userDTO.email());
+            User user=new User(userReq.username(), userReq.email());
             addUserAndSaveToFile(user);
             return true;
         }
        return  false;
     }
 
-    public boolean updateUser(@NotNull UserDTO userDTO) {
-        if (!userDTO.username().isEmpty() && !userDTO.email().isEmpty()) {
-            Optional<User> userForUpdate = userRepository.findByEmail(userDTO.email());
+    public boolean updateUser(@NotNull UserReq userReq) {
+        if (!userReq.username().isEmpty() && !userReq.email().isEmpty()) {
+            Optional<User> userForUpdate = userRepository.findByEmail(userReq.email());
             if (userForUpdate.isPresent()) {
                 User user = userForUpdate.get();
-                user.setEmail(userDTO.email());
-                user.setUsername(userDTO.username());
+                user.setEmail(userReq.email());
+                user.setUsername(userReq.username());
 
                 addUserAndSaveToFile(user);
                 return true;

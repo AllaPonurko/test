@@ -1,7 +1,7 @@
 package org.example.controller;
 
-import org.example.dto.BaseDTO;
-import org.example.dto.OrderDetailDTO;
+import org.example.dto.BaseReq;
+import org.example.dto.OrderDetailReq;
 import org.example.models.orders.OrderDetail;
 import org.example.models.products.Book;
 import org.example.models.products.Vendor;
@@ -50,7 +50,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
     @PostMapping("/createOrderDetail")
-    public  ResponseEntity<?> createOrderDetail(@RequestBody OrderDetailDTO detailDTO) throws IOException, ClassNotFoundException {
+    public  ResponseEntity<?> createOrderDetail(@RequestBody OrderDetailReq detailDTO) throws IOException, ClassNotFoundException {
         OrderDetail orderDetail=orderDetailService.createProduct(detailDTO);
         if(orderDetail!=null) {
             return ResponseEntity.ok(orderDetail);
@@ -59,11 +59,11 @@ public class ProductController {
     }
 
     @PostMapping("/createItem")
-    public ResponseEntity<?> createProduct(@RequestBody BaseDTO baseDTO) throws IOException, ClassNotFoundException {
-        switch (baseDTO.productType()) {
+    public ResponseEntity<?> createProduct(@RequestBody BaseReq baseReq) throws IOException, ClassNotFoundException {
+        switch (baseReq.productType()) {
             case "book": {
                 try {
-                    Book book=bookService.createProduct(baseDTO);
+                    Book book=bookService.createProduct(baseReq);
                     if(book!=null)
                     {
                         BookResponse response=new BookResponse("Book is created successful!!!",book);
@@ -77,7 +77,7 @@ public class ProductController {
             }
             case "vendor": {
                 try {
-                    if(vendorService.createProduct(baseDTO)!=null)
+                    if(vendorService.createProduct(baseReq)!=null)
                     return
                             ResponseEntity.ok("Vendor was created successful!!!");
                     else

@@ -1,7 +1,7 @@
 package org.example.services.services;
 
 import jakarta.annotation.PostConstruct;
-import org.example.dto.BaseDTO;
+import org.example.dto.BaseReq;
 import org.example.models.products.Vendor;
 import org.example.repositories.VendorRepository;
 import org.example.services.interfaces.IProductService;
@@ -12,14 +12,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class VendorService extends BaseService<Vendor>
         implements
-        IProductService<Vendor,BaseDTO>,
+        IProductService<Vendor, BaseReq>,
         IVendorService<Vendor> {
     @Autowired
     private final VendorRepository vendorRepository;
@@ -63,16 +62,16 @@ public class VendorService extends BaseService<Vendor>
     }
 
     @Override
-    public Vendor createProduct(BaseDTO baseDTO) throws IOException, ClassNotFoundException {
-        if (!baseDTO.name().isEmpty()
-                && !baseDTO.country().isEmpty()) {
+    public Vendor createProduct(BaseReq baseReq) throws IOException, ClassNotFoundException {
+        if (!baseReq.name().isEmpty()
+                && !baseReq.country().isEmpty()) {
             try {
-                if(vendorRepository.findByBrand(baseDTO.name()).isPresent()) {
+                if(vendorRepository.findByBrand(baseReq.name()).isPresent()) {
                     return null;
                 }
                 Vendor vendor = new Vendor();
-                vendor.setName(baseDTO.name());
-                vendor.setCountry(baseDTO.country());
+                vendor.setName(baseReq.name());
+                vendor.setCountry(baseReq.country());
                 addEntity(vendor, vendorDataFile, vendorRepository);
                 return vendor;
             } catch (IOException e) {

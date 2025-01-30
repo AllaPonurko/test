@@ -1,6 +1,6 @@
 package org.example.controller;
 
-import org.example.dto.UserDTO;
+import org.example.dto.UserReq;
 import org.example.models.User;
 import org.example.responses.UserResponse;
 import org.example.responses.UsersResponse;
@@ -74,8 +74,8 @@ public class UserController {
             return null;}
     }
     @PutMapping("/updateUser")
-    public ResponseEntity<?> UpdateUser(@RequestBody UserDTO userDTO){
-        if(userService.updateUser(userDTO)){
+    public ResponseEntity<?> UpdateUser(@RequestBody UserReq userReq){
+        if(userService.updateUser(userReq)){
             return  ResponseEntity.ok().body("User data successfully updated.");
         }
         return ResponseEntity.status(HttpStatus.CONFLICT).body("User data could not be updated.");

@@ -2,12 +2,10 @@ package org.example.services.services;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
-import org.example.dto.BaseDTO;
+import org.example.dto.BaseReq;
 import org.example.events.BookCreatedEvent;
 import org.example.models.products.Book;
-import org.example.models.products.Product;
 import org.example.repositories.BookRepository;
-import org.example.repositories.ProductRepository;
 import org.example.services.interfaces.IBookService;
 import org.example.services.interfaces.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class BookService extends BaseService<Book> implements IProductService <Book,BaseDTO>, IBookService<Book> {
+public class BookService extends BaseService<Book> implements IProductService <Book, BaseReq>, IBookService<Book> {
     private List<Book> books;
     @Value("${book.data.file}")
     private String bookDataFile;
@@ -54,11 +52,11 @@ public class BookService extends BaseService<Book> implements IProductService <B
 
     @Override
     @Transactional
-    public Book createProduct(BaseDTO baseDTO) throws IOException, ClassNotFoundException {
-        if(!baseDTO.name().isEmpty()&&!baseDTO.genre().isEmpty()
-                &&!baseDTO.author().isEmpty()&& !(baseDTO.price() ==0)) {
-            Book book = new Book(baseDTO.name(),baseDTO.price(),
-                    baseDTO.description(),baseDTO.genre(),baseDTO.author());
+    public Book createProduct(BaseReq baseReq) throws IOException, ClassNotFoundException {
+        if(!baseReq.name().isEmpty()&&!baseReq.genre().isEmpty()
+                &&!baseReq.author().isEmpty()&& !(baseReq.price() ==0)) {
+            Book book = new Book(baseReq.name(), baseReq.price(),
+                    baseReq.description(), baseReq.genre(), baseReq.author());
             book.setAvailable(true);
             eventPublisher.publishEvent(new BookCreatedEvent(this,book));
             try {

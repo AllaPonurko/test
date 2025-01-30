@@ -1,9 +1,8 @@
 package org.example.services.services;
 
 import jakarta.annotation.PostConstruct;
-import org.example.dto.OrderDetailDTO;
+import org.example.dto.OrderDetailReq;
 import org.example.models.orders.OrderDetail;
-import org.example.models.products.Book;
 import org.example.repositories.BookRepository;
 import org.example.repositories.OrderDetailRepository;
 import org.example.services.interfaces.IProductService;
@@ -18,7 +17,7 @@ import java.util.UUID;
 
 @Service
 
-public class OrderDetailService extends BaseService<OrderDetail>implements IProductService<OrderDetail, OrderDetailDTO> {
+public class OrderDetailService extends BaseService<OrderDetail>implements IProductService<OrderDetail, OrderDetailReq> {
     private List<OrderDetail> orderDetails;
     @Autowired
     private final OrderDetailRepository orderDetailRepository;
@@ -45,11 +44,11 @@ public class OrderDetailService extends BaseService<OrderDetail>implements IProd
     }
 
     @Override
-    public OrderDetail createProduct(OrderDetailDTO orderDetailDTO)
+    public OrderDetail createProduct(OrderDetailReq orderDetailReq)
             throws IOException, ClassNotFoundException, RuntimeException {
-        if (orderDetailDTO != null && !orderDetailDTO.books().isEmpty()) {
+        if (orderDetailReq != null && !orderDetailReq.books().isEmpty()) {
             OrderDetail orderDetail = new OrderDetail();
-            for (UUID id : orderDetailDTO.books()) {
+            for (UUID id : orderDetailReq.books()) {
                 orderDetail.getbooksList()
                         .add(bookRepository.findById(id).get());
             }
