@@ -56,18 +56,22 @@ public class UserController {
     {
         List<User> users=userService.getUsers();
         logger.info("Received request for all users");
-        logger.debug("Loaded users: {}", users);
         UsersResponse response = new UsersResponse( users);
-        if(!users.isEmpty()) return ResponseEntity.ok(response);
-        else return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Users don't exist");
+        if(!users.isEmpty()){logger.debug("Loaded users: {}", users);
+            return ResponseEntity.ok(response);}
+        else {logger.warn("List users is empty");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Users don't exist");}
     }
     @GetMapping("/getUsers")
     public List<User> GetUsersList()
     {
         List<User> users=userService.getUsers();
-
-        if(!users.isEmpty()) return users;
-        else return null;
+        if(!users.isEmpty()) {
+            logger.info("List users is downloaded");
+            return users;}
+        else {
+            logger.info("Users don't exist");
+            return null;}
     }
     @PutMapping("/updateUser")
     public ResponseEntity<?> UpdateUser(@RequestBody UserDTO userDTO){

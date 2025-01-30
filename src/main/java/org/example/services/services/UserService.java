@@ -2,6 +2,8 @@ package org.example.services.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.dto.UserDTO;
 import org.example.models.User;
 import org.example.repositories.UserRepository;
@@ -17,7 +19,7 @@ import java.util.*;
 @Service
 public class UserService implements IUserService {
     private List<User> users;
-
+    private static final Logger LOGGER = LogManager.getLogger();
     @Value("${user.data.file}")
     private String userDataFile;
     @Autowired
@@ -43,9 +45,9 @@ public class UserService implements IUserService {
             }
             if (userRepository.count() == 0) {
                 userRepository.saveAll(users);
-                System.out.println("Users imported into the database.");
+                LOGGER.info("Users imported into the database.");
             } else {
-                System.out.println("Users already exist in the database.");
+                LOGGER.info("Users already exist in the database.");
             }
             return users;
         }
@@ -59,27 +61,27 @@ public class UserService implements IUserService {
 
     @Override
     public Optional<User> getUser(String userIdString) {
-        System.out.println("Searching for user with id: " + userIdString);
+        LOGGER.info("Searching for user with id: " + userIdString);
         try {
             UUID id = UUID.fromString(userIdString);
-            System.out.println("Converted UUID: " + id);
+            LOGGER.info("Converted UUID: " + id);
             Optional<User> user = userRepository.findById(id);
-            System.out.println("User found: " + user.isPresent());
+            LOGGER.info("User found: " + user.isPresent());
             return user;
         } catch (IllegalArgumentException e) {
-            System.err.println("Invalid UUID format: " + userIdString);
+            LOGGER.info("Invalid UUID format: " + userIdString);
             return Optional.empty();
         }
     }
 
     @Override
     public boolean createUser(UserDTO userDTO) {
-        System.out.println("Current users: " + userRepository.count());
-        if(userDTO != null && userDTO.email != null && userDTO.username != null) {
-            if(userRepository.findByEmail(userDTO.email).isPresent()) {
+        LOGGER.info("Current users: " + userRepository.count());
+        if(userDTO != null && userDTO.email() != null && userDTO.username() != null) {
+            if(userRepository.findByEmail(userDTO.email()).isPresent()) {
                 return false;
             }
-            User user=new User(userDTO.username, userDTO.email);
+            User user=new User(userDTO.username(), userDTO.email());
             addUserAndSaveToFile(user);
             return true;
         }
@@ -87,12 +89,12 @@ public class UserService implements IUserService {
     }
 
     public boolean updateUser(@NotNull UserDTO userDTO) {
-        if (!userDTO.username.isEmpty() && !userDTO.email.isEmpty()) {
-            Optional<User> userForUpdate = userRepository.findByEmail(userDTO.email);
+        if (!userDTO.username().isEmpty() && !userDTO.email().isEmpty()) {
+            Optional<User> userForUpdate = userRepository.findByEmail(userDTO.email());
             if (userForUpdate.isPresent()) {
                 User user = userForUpdate.get();
-                user.setEmail(userDTO.email);
-                user.setUsername(userDTO.username);
+                user.setEmail(userDTO.email());
+                user.setUsername(userDTO.username());
 
                 addUserAndSaveToFile(user);
                 return true;
@@ -135,12 +137,12 @@ public class UserService implements IUserService {
             Optional<User> userToRemove = getUser(id.toString());
             if (userToRemove.isPresent()) {
                    userRepository.delete(userToRemove.get());
-                   System.out.println("User deleted from database.");
+                LOGGER.info("User deleted from database.");
 
                    return true;
             }
         } catch (IllegalArgumentException e) {
-            System.err.println("Invalid UUID format: " + userIdString);
+            LOGGER.info("Invalid UUID format: " + userIdString);
         }
         return false;
     }
@@ -157,7 +159,7 @@ public class UserService implements IUserService {
             updateUserFile();
             return true;
         } else {
-            System.out.println("Failed to delete user or user not found.");
+            LOGGER.info("Failed to delete user or user not found.");
             return false;
         }
     }
@@ -165,7 +167,7 @@ public class UserService implements IUserService {
         try {
             List<User> allUsers = getUsers();
             writeUsersToFile(allUsers);
-            System.out.println("User file updated.");
+            LOGGER.info("User file updated.");
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error updating user file: " + e.getMessage());
@@ -186,7 +188,7 @@ public class UserService implements IUserService {
         System.out.println("Searching for user with email: " + email);
         try {
             Optional<User> user = userRepository.findByEmail(email);
-            System.out.println("User found: " + user.isPresent());
+            LOGGER.info("User found: " + user.isPresent());
             return user;
         } catch (IllegalArgumentException e) {
 

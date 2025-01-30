@@ -16,6 +16,7 @@ import java.util.UUID;
 @Service
 public abstract class BaseService<T>  {
    protected JpaRepository<T, UUID> repository;
+
     public List<T> readFromJsonFile(String filePath,
                                     JpaRepository<T,
                                     UUID> repository)

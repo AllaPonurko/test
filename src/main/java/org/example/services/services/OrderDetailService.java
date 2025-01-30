@@ -47,9 +47,9 @@ public class OrderDetailService extends BaseService<OrderDetail>implements IProd
     @Override
     public OrderDetail createProduct(OrderDetailDTO orderDetailDTO)
             throws IOException, ClassNotFoundException, RuntimeException {
-        if (orderDetailDTO != null && !orderDetailDTO.books.isEmpty()) {
+        if (orderDetailDTO != null && !orderDetailDTO.books().isEmpty()) {
             OrderDetail orderDetail = new OrderDetail();
-            for (UUID id : orderDetailDTO.books) {
+            for (UUID id : orderDetailDTO.books()) {
                 orderDetail.getbooksList()
                         .add(bookRepository.findById(id).get());
             }

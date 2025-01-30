@@ -43,9 +43,9 @@ public class ProductService<Product> extends BaseService<org.example.models.prod
     }
     @Transactional
     public org.example.models.products.Product createProduct(BaseDTO baseDTO) throws IOException, ClassNotFoundException {
-        if(!baseDTO.name.isEmpty() && !(baseDTO.price ==0)){
-            org.example.models.products.Product product = new org.example.models.products.Product(baseDTO.name,baseDTO.price,
-                    baseDTO.description);
+        if(!baseDTO.name().isEmpty() && !(baseDTO.price() ==0)){
+            org.example.models.products.Product product = new org.example.models.products.Product(baseDTO.name(),baseDTO.price(),
+                    baseDTO.description());
             product.setAvailable(true);
             try {
                 addEntity( product,productDataFile,  productRepository);

@@ -2,14 +2,17 @@ package org.example.dto;
 
 
 
-public class BaseDTO {
-    public String name;
-    public double price;
-    public String description;
-    public String productType;
+public record BaseDTO ( String name,
+         double price,
+         String description,
+         String productType,
 
-    public String author;
-    public String genre;
-    public String country;
+         String author,
+         String genre,
+         String country) {
 
 }
+
+
+
+

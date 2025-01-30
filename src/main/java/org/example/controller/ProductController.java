@@ -60,7 +60,7 @@ public class ProductController {
 
     @PostMapping("/createItem")
     public ResponseEntity<?> createProduct(@RequestBody BaseDTO baseDTO) throws IOException, ClassNotFoundException {
-        switch (baseDTO.productType) {
+        switch (baseDTO.productType()) {
             case "book": {
                 try {
                     Book book=bookService.createProduct(baseDTO);

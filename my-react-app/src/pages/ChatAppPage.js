@@ -39,8 +39,10 @@ const WebSocketComponent = () => {
 
   const sendMessage = () => {
     if (ws && ws.readyState === WebSocket.OPEN && inputMessage.trim()) {
-      ws.send(inputMessage);
-      console.log('Sent:', inputMessage);
+      const currentTime = new Date().toLocaleString();
+      const messageWithTime = `Message: ${inputMessage}, Sent at: ${currentTime}`;
+      ws.send(messageWithTime);
+      console.log('Sent:', messageWithTime);
       setInputMessage('');
     } else {
       console.error('WebSocket is not open');

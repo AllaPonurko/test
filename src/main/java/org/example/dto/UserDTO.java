@@ -1,6 +1,5 @@
 package org.example.dto;
 
-public class UserDTO {
-    public String username;
-    public String email;
+public record UserDTO(String username,String email) {
+
 }

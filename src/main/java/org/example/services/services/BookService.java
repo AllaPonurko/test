@@ -3,6 +3,7 @@ package org.example.services.services;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import org.example.dto.BaseDTO;
+import org.example.events.BookCreatedEvent;
 import org.example.models.products.Book;
 import org.example.models.products.Product;
 import org.example.repositories.BookRepository;
@@ -11,6 +12,7 @@ import org.example.services.interfaces.IBookService;
 import org.example.services.interfaces.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -25,9 +27,10 @@ public class BookService extends BaseService<Book> implements IProductService <B
     private String bookDataFile;
     @Autowired
     private final BookRepository bookRepository;
-
-    public BookService(BookRepository bookRepository){
+    private final ApplicationEventPublisher eventPublisher;
+    public BookService(BookRepository bookRepository, ApplicationEventPublisher eventPublisher){
         this.bookRepository=bookRepository;
+        this.eventPublisher = eventPublisher;
         this.repository = bookRepository;
 
     }
@@ -52,11 +55,12 @@ public class BookService extends BaseService<Book> implements IProductService <B
     @Override
     @Transactional
     public Book createProduct(BaseDTO baseDTO) throws IOException, ClassNotFoundException {
-        if(!baseDTO.name.isEmpty()&&!baseDTO.genre.isEmpty()
-                &&!baseDTO.author.isEmpty()&& !(baseDTO.price ==0)) {
-            Book book = new Book(baseDTO.name,baseDTO.price,
-                    baseDTO.description,baseDTO.genre,baseDTO.author);
+        if(!baseDTO.name().isEmpty()&&!baseDTO.genre().isEmpty()
+                &&!baseDTO.author().isEmpty()&& !(baseDTO.price() ==0)) {
+            Book book = new Book(baseDTO.name(),baseDTO.price(),
+                    baseDTO.description(),baseDTO.genre(),baseDTO.author());
             book.setAvailable(true);
+            eventPublisher.publishEvent(new BookCreatedEvent(this,book));
             try {
                 addEntity(book, bookDataFile, bookRepository);
                 return book;

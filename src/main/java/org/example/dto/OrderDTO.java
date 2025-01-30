@@ -2,7 +2,7 @@ package org.example.dto;
 
 import java.util.UUID;
 
-public class OrderDTO extends BaseDTO{
-    public UUID userId;
-    public UUID orderId;
+public record OrderDTO() {
+    public static UUID userId;
+    public static UUID orderId;
 }

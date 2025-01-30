@@ -64,15 +64,15 @@ public class VendorService extends BaseService<Vendor>
 
     @Override
     public Vendor createProduct(BaseDTO baseDTO) throws IOException, ClassNotFoundException {
-        if (!baseDTO.name.isEmpty()
-                && !baseDTO.country.isEmpty()) {
+        if (!baseDTO.name().isEmpty()
+                && !baseDTO.country().isEmpty()) {
             try {
-                if(vendorRepository.findByBrand(baseDTO.name).isPresent()) {
+                if(vendorRepository.findByBrand(baseDTO.name()).isPresent()) {
                     return null;
                 }
                 Vendor vendor = new Vendor();
-                vendor.setName(baseDTO.name);
-                vendor.setCountry(baseDTO.country);
+                vendor.setName(baseDTO.name());
+                vendor.setCountry(baseDTO.country());
                 addEntity(vendor, vendorDataFile, vendorRepository);
                 return vendor;
             } catch (IOException e) {

@@ -7,6 +7,9 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @Slf4j
 @Component
 public class ShoWebSocketHandler implements WebSocketHandler {
@@ -17,7 +20,8 @@ public class ShoWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        log.info("Got message={}", message.getPayload());
+        log.info("Got message={}", message.getPayload(),
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         session.sendMessage(message);
     }
 
