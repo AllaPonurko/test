@@ -1,6 +1,6 @@
 package org.example.controller;
 
-import org.example.dto.UserDTO;
+import org.example.dto.UserReq;
 import org.example.services.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +18,8 @@ public class RegistrationController {
         userService=_userservice;
     }
     @PostMapping ("/create")
-    public ResponseEntity<String> registerUser(@RequestBody UserDTO userDTO) {
-        if(userService.createUser(userDTO))
+    public ResponseEntity<String> registerUser(@RequestBody UserReq userReq) {
+        if(userService.createUser(userReq))
         {
             return ResponseEntity.ok("User registered successfully!");
         }

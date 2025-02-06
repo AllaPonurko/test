@@ -1,8 +1,7 @@
 package org.example.services.services;
 
 import jakarta.annotation.PostConstruct;
-import org.example.dto.BaseDTO;
-import org.example.dto.OrderDTO;
+import org.example.dto.OrderReq;
 import org.example.models.orders.Order;
 import org.example.repositories.OrderRepository;
 import org.example.services.interfaces.IProductService;
@@ -16,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class OrderService extends BaseService<Order> implements IProductService<Order,OrderDTO> {
+public class OrderService extends BaseService<Order> implements IProductService<Order, OrderReq> {
     private List<Order> orders;
     @Autowired
     private final OrderRepository orderRepository;
@@ -40,8 +39,8 @@ public  void init() throws IOException, ClassNotFoundException {
         return orderRepository.findById(orderId);
     }
 @Override
-    public Order createProduct(OrderDTO orderDTO) throws IOException, ClassNotFoundException {
-        if(orderDTO!=null)
+    public Order createProduct(OrderReq orderReq) throws IOException, ClassNotFoundException {
+        if(orderReq !=null)
         {
             Order order=new Order();
             return order;
