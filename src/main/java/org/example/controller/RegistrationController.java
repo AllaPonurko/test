@@ -1,7 +1,7 @@
 package org.example.controller;
 
 import org.example.dto.UserReq;
-import org.example.services.services.UserService;
+import org.example.service.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;

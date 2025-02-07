@@ -1,16 +1,16 @@
 package org.example.controller;
 
 import org.example.dto.UserReq;
-import org.example.models.User;
-import org.example.responses.UserResponse;
-import org.example.responses.UsersResponse;
+import org.example.entity.user.User;
+import org.example.response.UserResponse;
+import org.example.response.UsersResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.example.services.services.UserService;
+import org.example.service.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +48,7 @@ public class UserController {
             UserResponse response = new UserResponse("User found.", user.get());
             return ResponseEntity.ok(String.valueOf(response));
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with id: "+email);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with email: "+email);
         }
     }
     @GetMapping("/getUsers_")
