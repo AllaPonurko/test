@@ -10,8 +10,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  *
  */
 @SpringBootApplication
-@ComponentScan(basePackages = {"org.example", "config"})
-@ComponentScan(basePackages = "org.example.controller")
+//@ComponentScan(basePackages = {"org.example.config","org.example.controller"})
+// потрібно за умови якщо config та controller знаходяться поза межі org.example
+//@ComponentScan(basePackages = "org.example.controller")
 //@EnableScheduling
 public class App 
 {
