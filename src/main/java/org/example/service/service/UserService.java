@@ -36,10 +36,10 @@ public class UserService implements IUserService {
         users=readUsersFromJsonFile();
     }
     @Override
-    public List<User> readUsersFromJsonFile() throws IOException {
+    public List<User> readUsersFromJsonFile()  {
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(userDataFile);
-        if (file.exists()) {
+        if (file.exists()&& file.length() > 0) {
             try {
                 users = objectMapper.readValue(file, new TypeReference<List<User>>() {
                 });
@@ -53,8 +53,37 @@ public class UserService implements IUserService {
                 LOGGER.info("Users already exist in the database.");
             }
             return users;
+        }else{
+            LOGGER.info("User data file not found. Creating new file...");
+            if (userRepository.count() > 0) {
+                // If users are in the database, save them to a new file
+                users = userRepository.findAll();
+                writeUsersToJsonFile(users); // Write a new file
+                LOGGER.info("New user data file created with existing users from the database.");
+            } else {
+                LOGGER.info("No users found in the database.");
+            }
         }
         return List.of();
+    }
+
+    private void writeUsersToJsonFile(List<User> users) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        File file = new File(userDataFile);
+        try {
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                if (file.createNewFile()) {
+                    LOGGER.info("A new file for users is created by the path: " + file.getAbsolutePath());
+                } else {
+                    LOGGER.warn("Couldn't create a new file. The file may already exist.");
+                }
+            }
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, users);
+            LOGGER.info("Users successfully written to the file.");
+        } catch (IOException e) {
+            throw new RuntimeException("Error writing users to file: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -82,7 +111,7 @@ public class UserService implements IUserService {
         LOGGER.info("Current users: " + userRepository.count());
         if(userReq != null && userReq.email() != null && userReq.username() != null) {
             if(userRepository.findByEmail(userReq.email()).isPresent()) {
-                return false;
+               return false;
             }
             User user=new User(userReq.username(), userReq.email());
             addUserAndSaveToFile(user);

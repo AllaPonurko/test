@@ -7,7 +7,7 @@ public record BaseReq(String name,
                       String description,
                       int productType,
                       String author,
-                      String genre,
+                      int genre,
                       String country) {
 
 }

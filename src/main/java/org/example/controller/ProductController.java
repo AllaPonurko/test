@@ -61,12 +61,14 @@ public class ProductController {
         }
         return ResponseEntity.status(500).body("Order isn't created");
     }
-@DeleteMapping("/deleteOrder")
-public ResponseEntity<String> deleteOrder(@RequestBody OrderReq orderReq){
-        if(orderService.deleteOrder(orderReq)==true)
+
+    @DeleteMapping("/deleteOrder")
+    public ResponseEntity<String> deleteOrder(@RequestBody OrderReq orderReq) {
+        if (orderService.deleteOrder(orderReq) == true)
             return ResponseEntity.ok("Order is deleted successful.");
-        else return ResponseEntity.status(404).body("Order with "+orderReq.orderId()+" does not exist");
-}
+        else return ResponseEntity.status(404).body("Order with " + orderReq.orderId() + " does not exist");
+    }
+
     @PostMapping("/createItem")
     public ResponseEntity<?> createProduct(@RequestBody BaseReq baseReq) throws IOException, ClassNotFoundException {
         switch (baseReq.productType()) {
@@ -77,10 +79,10 @@ public ResponseEntity<String> deleteOrder(@RequestBody OrderReq orderReq){
                         BookResponse response = new BookResponse("Book is created successful!!!", book);
                         return ResponseEntity.ok(String.valueOf(response));
                     }
-                } catch (IllegalArgumentException e) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to create a book" + e.getMessage());
                 } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
+                } catch (Exception e) {
+                    return ResponseEntity.status(400).body("Failed to create a book" + e.getMessage());
                 }
             }
             case 2: {
@@ -90,10 +92,10 @@ public ResponseEntity<String> deleteOrder(@RequestBody OrderReq orderReq){
                                 ResponseEntity.ok("Vendor was created successful!!!");
                     else
                         return ResponseEntity.status(HttpStatus.CONFLICT).body("This vendor already exists.");
-                } catch (IllegalArgumentException e) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to create a vendor" + e.getMessage());
                 } catch (IOException | ClassNotFoundException e) {
                     ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+                } catch (Exception e) {
+                    return ResponseEntity.status(400).body("Failed to create a vendor" + e.getMessage());
                 }
             }
         }
@@ -106,7 +108,12 @@ public ResponseEntity<String> deleteOrder(@RequestBody OrderReq orderReq){
             return ResponseEntity.ok("Book is deleted successful.");
         } else return ResponseEntity.status(404).body("Book with " + uuid_Book + " was not found.");
     }
-
+    @GetMapping("/getBooksByGenre")
+    public ResponseEntity<?> getBooksByGenre(String genre){
+        List<Book> books=bookService.findByGenre(genre);
+        ProductsResponse response=new ProductsResponse(books);
+        return ResponseEntity.status(200).body(response);
+    }
     @GetMapping("/getVendorByBrand")
     public ResponseEntity<String> getVendorByBrand(@RequestParam String brand) {
         Optional<Vendor> vendor = vendorService.findByBrand(brand);

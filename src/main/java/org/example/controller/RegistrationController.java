@@ -24,7 +24,7 @@ public class RegistrationController {
             return ResponseEntity.ok("User registered successfully!");
         }
         else
-            return ResponseEntity.status(500).body("The user already exists.");
+            return ResponseEntity.status(400).body("User with email "+userReq.email() +" is already exist.");
     }
 
     @DeleteMapping("/deleteById")
