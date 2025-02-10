@@ -24,7 +24,7 @@ public class BookServiceTest {
                 "this is a new book of well-known author",
                 1,
                 "Old author",
-                "New genre",
+                4,
                 "");
         Mockito.when(bookService.createProduct(Mockito.any(BaseReq.class))).thenReturn(mockBook);
       Book newBook=bookService.createProduct(newBookreq);
