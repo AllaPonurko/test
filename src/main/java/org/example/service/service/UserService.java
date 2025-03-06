@@ -33,7 +33,7 @@ public class UserService implements IUserService {
     }
     @PostConstruct
     public void init() throws IOException {
-        users=readUsersFromJsonFile();
+        //users=readUsersFromJsonFile();
     }
     @Override
     public List<User> readUsersFromJsonFile()  {

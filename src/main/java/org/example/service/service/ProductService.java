@@ -23,7 +23,6 @@ public class ProductService<Product> extends BaseService<org.example.entity.prod
     @Value("${product.data.file}")
 
     private String productDataFile;
-    private List<Electronic> electronics;
 
     @Autowired
     private final ProductRepository productRepository;
@@ -34,7 +33,6 @@ public class ProductService<Product> extends BaseService<org.example.entity.prod
     private final VendorRepository vendorRepository;
 
     public ProductService(ProductRepository productRepository,
-                          BookRepository bookRepository,
                           ElectronicsRepository electronicsRepository,
                           VendorRepository vendorRepository){
 
@@ -43,7 +41,7 @@ public class ProductService<Product> extends BaseService<org.example.entity.prod
         this.vendorRepository = vendorRepository;
     }
     @Transactional
-    public org.example.entity.product.Product createProduct(BaseReq baseReq) throws IOException, ClassNotFoundException {
+    public org.example.entity.product.Product createItem(BaseReq baseReq) throws IOException, ClassNotFoundException {
         if(!baseReq.name().isEmpty() && !(baseReq.price() ==0)&&!(baseReq.productType()==0)){
             org.example.entity.product.Product product = new org.example.entity.product.Product(baseReq.name(), baseReq.price(),
                     baseReq.description());
@@ -61,7 +59,7 @@ public class ProductService<Product> extends BaseService<org.example.entity.prod
             }
             product.setAvailable(true);
             try {
-                addEntity( product,productDataFile,  productRepository);
+                addEntity( product,  productRepository);
                 return product;
             } catch (Exception e) {
                 e.printStackTrace();

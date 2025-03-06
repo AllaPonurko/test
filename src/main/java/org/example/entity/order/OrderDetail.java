@@ -2,6 +2,7 @@ package org.example.entity.order;
 
 import jakarta.persistence.*;
 import org.example.entity.product.Book;
+import org.example.entity.product.Product;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,16 +17,18 @@ public class OrderDetail extends OrderBase{
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
 
-    private List<Book> booksList;
+    private List<Product> itemList;
     public OrderDetail()
     {
-        booksList=new ArrayList<Book>();
+        itemList=new ArrayList<Product>();
     }
-    public List<Book> getbooksList() {
 
-        return booksList;
+
+    public List<Product> getItemList() {
+        return itemList;
     }
-    public void setBooksList(List<Book> booksList) {
-        this.booksList = booksList;
+
+    public void setItemList(List<Product> itemList) {
+        this.itemList = itemList;
     }
 }

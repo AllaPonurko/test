@@ -1,6 +1,8 @@
 package org.example.service.service;
 
 import jakarta.annotation.PostConstruct;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.dto.BaseReq;
 import org.example.entity.product.Vendor;
 import org.example.repository.VendorRepository;
@@ -25,14 +27,14 @@ public class VendorService extends BaseService<Vendor>
     @Value("${vendor.data.file}")
     private String vendorDataFile;
     private List<Vendor> vendorList;
-
+    private static final Logger LOGGER = LogManager.getLogger();
     public VendorService(VendorRepository vendorRepository) {
         this.vendorRepository = vendorRepository;
     }
 
     @PostConstruct
     public void init() throws IOException, ClassNotFoundException {
-        vendorList = readFromJsonFile(vendorDataFile, vendorRepository);
+        //vendorList = readFromJsonFile(vendorDataFile, vendorRepository);
     }
 
     @Override
@@ -62,7 +64,7 @@ public class VendorService extends BaseService<Vendor>
     }
 
     @Override
-    public Vendor createProduct(BaseReq baseReq) throws IOException, ClassNotFoundException {
+    public Vendor createItem(BaseReq baseReq) throws IOException, ClassNotFoundException {
         if (!baseReq.name().isEmpty()
                 && !baseReq.country().isEmpty()) {
             try {
@@ -73,7 +75,7 @@ public class VendorService extends BaseService<Vendor>
                 vendor.setName(baseReq.name());
                 vendor.setCountry(baseReq.country());
 
-                addEntity(vendor, vendorDataFile, vendorRepository);
+                addEntity(vendor, vendorRepository);
                 return vendor;
             } catch (IOException e) {
                 e.printStackTrace();

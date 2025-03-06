@@ -3,10 +3,11 @@ package org.example.service.service;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import org.example.dto.OrderDetailReq;
-import org.example.dto.OrderReq;
 import org.example.entity.order.OrderDetail;
+import org.example.entity.product.Product;
 import org.example.repository.BookRepository;
 import org.example.repository.OrderDetailRepository;
+import org.example.repository.ProductRepository;
 import org.example.service.interfaces.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,19 +21,19 @@ import java.util.UUID;
 @Service
 
 public class OrderDetailService extends BaseService<OrderDetail>implements IProductService<OrderDetail, OrderDetailReq> {
-    private List<OrderDetail> orderDetails;
+
     @Autowired
     private final OrderDetailRepository orderDetailRepository;
-    private  final BookRepository bookRepository;
+    private  final ProductRepository productRepository;
     @Value("${orderDetail.data.file}")
     private String orderDetailDataFile;
-    public OrderDetailService(OrderDetailRepository orderDetailRepository, BookRepository bookRepository) {
+    public OrderDetailService(OrderDetailRepository orderDetailRepository, ProductRepository productRepository) {
         this.orderDetailRepository = orderDetailRepository;
-        this.bookRepository = bookRepository;
+        this.productRepository = productRepository;
     }
     @PostConstruct
     public void init() throws IOException, ClassNotFoundException {
-        orderDetails=readFromJsonFile(orderDetailDataFile,orderDetailRepository);
+        //orderDetails=readFromJsonFile(orderDetailDataFile,orderDetailRepository);
     }
     @Override
     protected Class<OrderDetail> getEntityClass() {
@@ -47,18 +48,21 @@ public class OrderDetailService extends BaseService<OrderDetail>implements IProd
     }
 
     @Override
+    public OrderDetail createItem(OrderDetailReq baseDTO) throws IOException, ClassNotFoundException, RuntimeException {
+        return null;
+    }
+
+
     @Transactional
-    public OrderDetail createProduct(OrderDetailReq orderDetailReq)
-            throws IOException, ClassNotFoundException, RuntimeException {
-        if (orderDetailReq != null && !orderDetailReq.books().isEmpty()) {
+    public OrderDetail createOrderDetail(OrderDetailReq<Product> orderDetailReq) {
+        if (orderDetailReq != null && !orderDetailReq.uuidList().isEmpty()) {
             OrderDetail orderDetail = new OrderDetail();
-            for (UUID id : orderDetailReq.books()) {
-                orderDetail.getbooksList()
-                        .add(bookRepository.findById(id).get());
+            for (UUID id : orderDetailReq.uuidList()) {
+                Product item=productRepository.findById(id).get();
+                orderDetail.getItemList().add(item);
             }
             try {
-                addEntity(orderDetail, orderDetailDataFile, orderDetailRepository);
-                orderDetailRepository.save(orderDetail);
+                addEntity(orderDetail, orderDetailRepository);
                 return orderDetail;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -68,9 +72,9 @@ public class OrderDetailService extends BaseService<OrderDetail>implements IProd
         return null;
     }
     @Transactional
-    public boolean deleteOrderDetail(OrderReq orderReq ){
+    public boolean deleteOrderDetail(String orderId){
       boolean isOrderDetailDelete=false;
-      OrderDetail orderDetail=orderDetailRepository.findByUuid(UUID.fromString(orderReq.orderId()));
+      OrderDetail orderDetail=orderDetailRepository.findByUuid(UUID.fromString(orderId));
       if(orderDetail!=null){
           orderDetailRepository.delete(orderDetail);
           isOrderDetailDelete=true;
