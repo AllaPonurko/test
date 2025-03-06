@@ -26,8 +26,8 @@ public class BookServiceTest {
                 "Old author",
                 4,
                 "");
-        Mockito.when(bookService.createProduct(Mockito.any(BaseReq.class))).thenReturn(mockBook);
-      Book newBook=bookService.createProduct(newBookreq);
+        Mockito.when(bookService.createItem(Mockito.any(BaseReq.class))).thenReturn(mockBook);
+      Book newBook=bookService.createItem(newBookreq);
       Assertions.assertEquals("Mock title", mockBook.getName());
       Assertions.assertTrue(newBook!=null,"Book is created successful");
     }

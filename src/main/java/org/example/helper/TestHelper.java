@@ -2,7 +2,6 @@ package org.example.helper;
 
 import org.example.dto.BaseReq;
 import org.example.entity.product.Book;
-import org.example.enums.GenreType;
 import org.example.service.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +23,6 @@ public class TestHelper {
                 "Old author",
                 4,
                "");
-        return  bookService.createProduct(newBook);
+        return  bookService.createItem(newBook);
     }
 }

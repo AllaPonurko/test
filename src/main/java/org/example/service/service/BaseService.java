@@ -20,8 +20,7 @@ public abstract class BaseService<T> {
     protected JpaRepository<T, UUID> repository;
     private static final Logger LOGGER = LogManager.getLogger();
     public List<T> readFromJsonFile(String filePath,
-                                    JpaRepository<T,
-                                            UUID> repository)
+                                    JpaRepository<T, UUID> repository)
             throws IOException, ClassNotFoundException {
         ObjectMapper mapper = new ObjectMapper();
         File file = new File(filePath);
@@ -29,16 +28,16 @@ public abstract class BaseService<T> {
         var name=repository.getClass().getName();
         if (file.exists() && file.length() > 0) {
             try {
-                products = mapper.readValue(file, new TypeReference<>() {
+                products = mapper.readValue(file, new TypeReference<List<T>>()  {
                 });
             } catch (IOException e) {
                 throw new RuntimeException("Error reading JSON file: " + e.getMessage(), e);
             }
             if (repository.count() == 0) {
                 repository.saveAll(products);
-                System.out.println("Products imported into the database.");
+                LOGGER.info("Products imported into the database.");
             } else {
-                System.out.println("Products already exist in the database.");
+                LOGGER.info("Products already exist in the database.");
             }
             return products;
         }else{
@@ -48,7 +47,6 @@ public abstract class BaseService<T> {
                 writeItemsToJsonFile(products,filePath);
                 LOGGER.info("New "+name+" data file created with existing items from the database.");
             }else {
-
                 LOGGER.info("No "+name+" found in the database.");
             }
         }
@@ -62,11 +60,8 @@ public abstract class BaseService<T> {
     }
 
     @Transactional
-    public void addEntity(T entity, String filePath, JpaRepository<T, UUID> repository) throws IOException, ClassNotFoundException {
+    public void addEntity(T entity, JpaRepository<T, UUID> repository) throws IOException, ClassNotFoundException {
         repository.save(entity);
-        List<T> entities = readFromJsonFile(filePath, repository);
-        entities.add(entity);
-        addToFile(entities, filePath);
     }
 
     private void writeItemsToJsonFile(List<T> list,String filepath) {
@@ -74,7 +69,11 @@ public abstract class BaseService<T> {
         File file = new File(filepath);
         try {
             if (!file.exists()) {
-                file.getParentFile().mkdirs();
+                File parentDir = file.getParentFile();
+                if (parentDir != null && !parentDir.exists()) {
+                    parentDir.mkdirs();
+                }
+                // file.getParentFile().mkdirs();
                 if (file.createNewFile()) {
                     LOGGER.info("A new file for items is created by the path: " + file.getAbsolutePath());
                 } else {

@@ -25,7 +25,7 @@ import java.util.UUID;
 
 @Service
 public class BookService extends BaseService<Book> implements IProductService<Book, BaseReq>, IBookService<Book> {
-    private List<Book> books;
+
     @Value("${book.data.file}")
     private String bookDataFile;
     @Autowired
@@ -46,7 +46,7 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
 
     @PostConstruct
     public void init() throws IOException, ClassNotFoundException {
-        books = readFromJsonFile(bookDataFile, bookRepository);
+        //books = readFromJsonFile(bookDataFile, bookRepository);
     }
 
     @Override
@@ -70,10 +70,10 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
 
     @Override
     @Transactional
-    public Book createProduct(BaseReq baseReq) throws IOException, ClassNotFoundException {
+    public Book createItem(BaseReq baseReq) throws IOException, ClassNotFoundException {
         if (!baseReq.name().isEmpty() && baseReq.genre() != 0
                 && !baseReq.author().isEmpty() && !(baseReq.price() == 0)) {
-            String genre = "Not defined";
+            String genre = "";
             switch (baseReq.genre()) {
                 case 1:
                     genre = GenreType.DRAMA.toString();
@@ -96,6 +96,9 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
                 case 7:
                     genre = GenreType.SHORT_STORY.toString();
                     break;
+                default:
+                    genre="Not defined";
+                    break;
             }
             Book book = new Book(baseReq.name(), baseReq.price(),
                     baseReq.description(), genre, baseReq.author());
@@ -104,8 +107,8 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
             LOGGER.info("Book is created successfully " + book.toString());
             eventPublisher.publishEvent(new BookCreatedEvent(this, book));
             try {
-                addEntity(book, bookDataFile, bookRepository);
-                LOGGER.info("Book is added successfully ");
+                addEntity(book, bookRepository);
+                LOGGER.info("Book with {}",book.getId()+" is added successfully ");
                 return book;
             } catch (Exception e) {
                 e.printStackTrace();

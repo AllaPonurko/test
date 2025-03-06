@@ -1,5 +1,7 @@
 package org.example.service.notification;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.entity.product.Book;
 import org.example.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +15,7 @@ import java.util.List;
 public class BookNotificationScheduler {
     private final BookNotificationService bookNotificationService;
     private final BookRepository bookRepository;
-
+    private static final Logger LOGGER = LogManager.getLogger();
     List<Book> notifiedBooks = new ArrayList<>();
 
     @Autowired
@@ -23,14 +25,14 @@ public class BookNotificationScheduler {
 
     }
 
-    @Scheduled(fixedRate = 3000000)
-    public void notifyUsersAboutNewBooks() {
-        List<Book> newBooks = bookRepository.findAll();
-        newBooks.forEach(book -> {
-            if (!notifiedBooks.contains(book)) {
-                notifiedBooks.add(book);
-                bookNotificationService.sendNotificationToUsers(book);
-            }
-        });
-    }
+//    @Scheduled(fixedRate = 3000000)
+//    public void notifyUsersAboutNewBooks() {
+//        List<Book> newBooks = bookRepository.findAll();
+//        newBooks.forEach(book -> {
+//            if (!notifiedBooks.contains(book)) {
+//                notifiedBooks.add(book);
+//                bookNotificationService.sendNotificationToUsers(book);
+//            }
+//        });
+//    }
 }

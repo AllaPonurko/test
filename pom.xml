@@ -145,13 +145,12 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-mail</artifactId>
     </dependency>
-    <!-- messages dependencies -->
     <dependency>
-      <groupId>org.springframework.messaging</groupId>
-      <artifactId>spring-messaging</artifactId>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.2.24</version>
     </dependency>
-
-  </dependencies>
+ </dependencies>
   <repositories>
     <repository>
       <id>maven-central</id>

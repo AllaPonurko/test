@@ -2,25 +2,26 @@ package org.example.entity.order;
 
 import jakarta.persistence.*;
 import org.example.entity.user.User;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "\"orders\"")
-public class Order extends OrderBase{
+@Table(name = "orders")
+public class Order extends OrderBase {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;  // Foreign key reference to the User entity
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "orderDetail_id")
     private OrderDetail orderDetail;//Foreign key reference to the OrderDetail entity
-
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-    @Column(name = "is_payed", nullable = false )
+    @Column(name = "is_payed", nullable = false)
     private boolean isPayed;
 
     @Column(name = "total_price", nullable = false)
@@ -57,7 +58,6 @@ public class Order extends OrderBase{
     }
 
 
-
     public boolean isValid() {
         return isValid;
     }
@@ -88,5 +88,10 @@ public class Order extends OrderBase{
 
     public void setOrderDetail(OrderDetail orderDetail) {
         this.orderDetail = orderDetail;
+    }
+    @Override
+    public String toString(){
+        return String.format("Order with Id %s, created at %s, and total price %.2f ",
+                getId(), getCreatedAt(), getTotalPrice());
     }
 }

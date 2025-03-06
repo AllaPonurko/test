@@ -1,20 +1,17 @@
 package org.example.controller;
 
 import org.example.dto.BaseReq;
-import org.example.dto.OrderDetailReq;
-import org.example.dto.OrderReq;
+import org.example.dto.OrderDTO;
 import org.example.entity.order.Order;
-import org.example.entity.order.OrderDetail;
 import org.example.entity.product.Book;
 import org.example.entity.product.Vendor;
 import org.example.response.BookResponse;
-import org.example.response.ProductsResponse;
+import org.example.response.ItemsResponse;
 import org.example.response.VendorResponse;
 import org.example.service.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,57 +23,51 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/product")
-public class ProductController {
-    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
+public class ItemController {
+    private static final Logger logger = LoggerFactory.getLogger(ItemController.class);
     private final BookService bookService;
     private final VendorService vendorService;
-    private final OrderDetailService orderDetailService;
     private final OrderService orderService;
     private final ProductService productService;
 
     @Autowired
-    public ProductController(BookService bookService, VendorService vendorService, OrderDetailService orderDetailService, OrderService orderService, ProductService productService) {
+    public ItemController(BookService bookService, VendorService vendorService, OrderService orderService, ProductService productService) {
         this.bookService = bookService;
         this.vendorService = vendorService;
-        this.orderDetailService = orderDetailService;
         this.orderService = orderService;
         this.productService = productService;
-        logger.info("ProductController initialized!");
+        logger.info("ItemController initialized!");
     }
 
     @GetMapping("/getBooks")
     public ResponseEntity<?> getListOfBooks() {
-        List<Book> productList = bookService.getList();
-        ProductsResponse<Book> response = new ProductsResponse<>(productList);
-        if (productList.isEmpty())
+        List<Book> books = bookService.getList();
+        ItemsResponse<Book> response = new ItemsResponse<>(books);
+        if (books.isEmpty())
             return ResponseEntity.status(500).body("The list of products is not exist");
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/createOrderDetail")
-    public ResponseEntity<?> createOrderDetail(@RequestBody OrderDetailReq detailDTO) throws IOException, ClassNotFoundException {
-        OrderDetail orderDetail = orderDetailService.createProduct(detailDTO);
-        if (orderDetail != null) {
-            return ResponseEntity.ok(orderDetail);
+    @GetMapping("/getOrders")
+    public ResponseEntity<?> getOrders() {
+        List<OrderDTO> orders = orderService.getOrderList();
+        if (orders.isEmpty()) {
+            return ResponseEntity.status(404).body("List of orders isn't found");
         }
-        return ResponseEntity.status(500).body("Order isn't created");
+        ItemsResponse<OrderDTO> response = new ItemsResponse<>(orders);
+        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/deleteOrder")
-    public ResponseEntity<String> deleteOrder(@RequestBody OrderReq orderReq) {
-        if (orderService.deleteOrder(orderReq) == true)
-            return ResponseEntity.ok("Order is deleted successful.");
-        else return ResponseEntity.status(404).body("Order with " + orderReq.orderId() + " does not exist");
-    }
 
     @PostMapping("/createItem")
-    public ResponseEntity<?> createProduct(@RequestBody BaseReq baseReq) throws IOException, ClassNotFoundException {
+    public ResponseEntity<?> createItem(@RequestBody BaseReq baseReq) throws IOException, ClassNotFoundException {
         switch (baseReq.productType()) {
             case 1: {
                 try {
-                    Book book = bookService.createProduct(baseReq);
+                    Book book = bookService.createItem(baseReq);
                     if (book != null) {
                         BookResponse response = new BookResponse("Book is created successful!!!", book);
+                        logger.info("Book with Id {} ", book.getId() + " was created successful");
                         return ResponseEntity.ok(String.valueOf(response));
                     }
                 } catch (IOException | ClassNotFoundException e) {
@@ -87,7 +78,7 @@ public class ProductController {
             }
             case 2: {
                 try {
-                    if (vendorService.createProduct(baseReq) != null)
+                    if (vendorService.createItem(baseReq) != null)
                         return
                                 ResponseEntity.ok("Vendor was created successful!!!");
                     else
@@ -108,12 +99,14 @@ public class ProductController {
             return ResponseEntity.ok("Book is deleted successful.");
         } else return ResponseEntity.status(404).body("Book with " + uuid_Book + " was not found.");
     }
+
     @GetMapping("/getBooksByGenre")
-    public ResponseEntity<?> getBooksByGenre(String genre){
-        List<Book> books=bookService.findByGenre(genre);
-        ProductsResponse response=new ProductsResponse(books);
+    public ResponseEntity<?> getBooksByGenre(String genre) {
+        List<Book> books = bookService.findByGenre(genre);
+        ItemsResponse response = new ItemsResponse(books);
         return ResponseEntity.status(200).body(response);
     }
+
     @GetMapping("/getVendorByBrand")
     public ResponseEntity<String> getVendorByBrand(@RequestParam String brand) {
         Optional<Vendor> vendor = vendorService.findByBrand(brand);
