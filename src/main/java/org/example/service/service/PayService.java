@@ -4,7 +4,11 @@ import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.entity.order.Order;
+import org.example.enums.ReasonOfChanges;
+import org.example.event.EntityChangedEvent;
 import org.example.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -12,10 +16,13 @@ import java.util.UUID;
 @Service
 public class PayService {
     private static final Logger LOGGER = LogManager.getLogger();
+    @Autowired
     private final OrderRepository orderRepository;
-
-    public PayService(OrderRepository orderRepository) {
+    @Autowired
+    private final ApplicationEventPublisher eventPublisher;
+    public PayService(OrderRepository orderRepository, ApplicationEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -30,6 +37,7 @@ public class PayService {
             if (simulatePayment()) {
                 order.setPayed(true);
                 orderRepository.save(order);
+                eventPublisher.publishEvent(new EntityChangedEvent(order, ReasonOfChanges.UPDATED_PAY.getValue()));
                 LOGGER.info("Order " + orderId + " was paid successfully (simulated).");
                 return true;
             }

@@ -11,11 +11,14 @@ import org.example.dto.UserReq;
 import org.example.entity.order.Order;
 import org.example.entity.order.OrderDetail;
 import org.example.entity.user.User;
+import org.example.enums.ReasonOfChanges;
+import org.example.event.EntityChangedEvent;
 import org.example.repository.OrderRepository;
 import org.example.repository.UserRepository;
 import org.example.service.interfaces.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -35,13 +38,15 @@ public class OrderService extends BaseService<Order> implements IProductService<
     private final OrderDetailService orderDetailService;
     @Autowired
     private final UserRepository userRepository;
+    @Autowired
+    private final ApplicationEventPublisher eventPublisher;
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public OrderService(OrderRepository orderRepository, OrderDetailService orderDetailService, UserRepository userRepository) {
+    public OrderService(OrderRepository orderRepository, OrderDetailService orderDetailService, UserRepository userRepository, ApplicationEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
         this.orderDetailService = orderDetailService;
         this.userRepository = userRepository;
-
+        this.eventPublisher = eventPublisher;
     }
 
     @PostConstruct
@@ -76,6 +81,7 @@ public class OrderService extends BaseService<Order> implements IProductService<
     public Order createOrder(OrderReq orderReq) throws IOException {
         try {
             if (orderReq != null) {
+                LOGGER.info("Start of order's creating...");
                 Order order = new Order();
                 OrderDetail orderDetail = orderDetailService.createOrderDetail(orderReq.orderDetailReq());
                 if (orderDetail != null) {
@@ -89,6 +95,8 @@ public class OrderService extends BaseService<Order> implements IProductService<
                 order.setPayed(false);
                 order.setValid(true);
                 orderRepository.save(order);
+                LOGGER.info("Order with Id {} created successful",order.getId());
+                eventPublisher.publishEvent(new EntityChangedEvent(order, ReasonOfChanges.CREATED_BY_USER.getValue()));
                 return order;
             }
         } catch (Exception e) {
@@ -108,7 +116,9 @@ public class OrderService extends BaseService<Order> implements IProductService<
         boolean isOrderDelete = false;
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isPresent()) {
+            eventPublisher.publishEvent(new EntityChangedEvent(order,ReasonOfChanges.MANUAL_DELETED.getValue()));
             orderRepository.delete(order.get());
+            LOGGER.info("Order with Id {} deleted successful",order.get().getId());
             isOrderDelete = true;
         }
         return isOrderDelete;

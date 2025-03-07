@@ -5,11 +5,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.dto.BaseReq;
 import org.example.entity.product.Vendor;
+import org.example.enums.ReasonOfChanges;
+import org.example.event.EntityChangedEvent;
 import org.example.repository.VendorRepository;
 import org.example.service.interfaces.IProductService;
 import org.example.service.interfaces.IVendorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -24,12 +27,15 @@ public class VendorService extends BaseService<Vendor>
         IVendorService<Vendor> {
     @Autowired
     private final VendorRepository vendorRepository;
+    @Autowired
+    private final ApplicationEventPublisher eventPublisher;
     @Value("${vendor.data.file}")
     private String vendorDataFile;
     private List<Vendor> vendorList;
     private static final Logger LOGGER = LogManager.getLogger();
-    public VendorService(VendorRepository vendorRepository) {
+    public VendorService(VendorRepository vendorRepository, ApplicationEventPublisher eventPublisher) {
         this.vendorRepository = vendorRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @PostConstruct
@@ -69,13 +75,15 @@ public class VendorService extends BaseService<Vendor>
                 && !baseReq.country().isEmpty()) {
             try {
                 if(vendorRepository.findByBrand(baseReq.name()).isPresent()) {
+                 LOGGER.info("This vendor with name {} is already exist",baseReq.name());
                     return null;
                 }
                 Vendor vendor = new Vendor();
                 vendor.setName(baseReq.name());
                 vendor.setCountry(baseReq.country());
-
                 addEntity(vendor, vendorRepository);
+                LOGGER.info("Vendor with name {} was created successful",vendor.getName());
+                eventPublisher.publishEvent(new EntityChangedEvent(vendor, ReasonOfChanges.CREATED_BY_ADMIN.getValue()));
                 return vendor;
             } catch (IOException e) {
                 e.printStackTrace();

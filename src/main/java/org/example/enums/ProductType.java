@@ -9,7 +9,8 @@ import org.example.enums.interfaces.CodeProvider;
 public enum ProductType  {
     BOOK("BOOK"),
     VENDOR("VENDOR"),
-    ELECTRONIC("ELECTRONIC");
+    ELECTRONIC("ELECTRONIC"),
+    PRODUCT("PRODUCT");
 
     private String value;
     ProductType(String value) {

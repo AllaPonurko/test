@@ -7,7 +7,9 @@ import org.apache.logging.log4j.Logger;
 import org.example.dto.BaseReq;
 import org.example.enums.GenreType;
 import org.example.enums.ProductType;
+import org.example.enums.ReasonOfChanges;
 import org.example.event.BookCreatedEvent;
+import org.example.event.EntityChangedEvent;
 import org.example.handler.ShoWebSocketHandler;
 import org.example.entity.product.Book;
 import org.example.repository.BookRepository;
@@ -34,6 +36,7 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
     private final ShoWebSocketHandler webSocketHandler;
 
     private static final Logger LOGGER = LogManager.getLogger();
+    @Autowired
     private final ApplicationEventPublisher eventPublisher;
 
     public BookService(BookRepository bookRepository, ShoWebSocketHandler webSocketHandler, ApplicationEventPublisher eventPublisher) {
@@ -109,6 +112,7 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
             try {
                 addEntity(book, bookRepository);
                 LOGGER.info("Book with {}",book.getId()+" is added successfully ");
+                eventPublisher.publishEvent(new EntityChangedEvent(book,ReasonOfChanges.CREATED_BY_ADMIN.getValue()));
                 return book;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -125,6 +129,7 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
         if (book.isPresent()) {
             bookRepository.delete(book.get());
             isBookDelete = true;
+            eventPublisher.publishEvent(new EntityChangedEvent(book,ReasonOfChanges.MANUAL_DELETED.getValue()));
         } else LOGGER.warn("Book with id " + uuid + " is not exist");
         return isBookDelete;
     }

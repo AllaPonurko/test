@@ -2,6 +2,7 @@ package org.example.entity.order;
 
 import jakarta.persistence.*;
 import org.example.entity.user.User;
+import org.example.listener.EntityChangesListener;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;

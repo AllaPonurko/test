@@ -1,9 +1,7 @@
 package org.example.entity.order;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
+import org.example.listener.EntityChangesListener;
 
 import java.util.UUID;
 
