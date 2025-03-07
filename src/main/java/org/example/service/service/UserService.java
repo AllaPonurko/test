@@ -1,4 +1,5 @@
 package org.example.service.service;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
@@ -6,6 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.dto.UserReq;
 import org.example.entity.user.User;
+import org.example.enums.ReasonOfChanges;
+import org.example.event.EntityChangedEvent;
 import org.example.repository.UserRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,7 @@ import java.util.*;
 @Service
 public class UserService implements IUserService {
     private List<User> users;
+    @Autowired
     private final ApplicationEventPublisher eventPublisher;
     private static final Logger LOGGER = LogManager.getLogger();
     @Value("${user.data.file}")
@@ -31,17 +35,19 @@ public class UserService implements IUserService {
         this.eventPublisher = eventPublisher;
         this.userRepository = userRepository;
     }
+
     @PostConstruct
     public void init() throws IOException {
         //users=readUsersFromJsonFile();
     }
+
     @Override
-    public List<User> readUsersFromJsonFile()  {
+    public List<User> readUsersFromJsonFile() {
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(userDataFile);
-        if (file.exists()&& file.length() > 0) {
+        if (file.exists() && file.length() > 0) {
             try {
-                users = objectMapper.readValue(file, new TypeReference<List<User>>() {
+                users = objectMapper.readValue(file, new TypeReference<>() {
                 });
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -53,7 +59,7 @@ public class UserService implements IUserService {
                 LOGGER.info("Users already exist in the database.");
             }
             return users;
-        }else{
+        } else {
             LOGGER.info("User data file not found. Creating new file...");
             if (userRepository.count() > 0) {
                 // If users are in the database, save them to a new file
@@ -92,7 +98,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public Optional<User> getUser(String userIdString) {
+    public Optional<User> getUser(@NotNull String userIdString) {
         LOGGER.info("Searching for user with id: " + userIdString);
         try {
             UUID id = UUID.fromString(userIdString);
@@ -107,18 +113,20 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean createUser(UserReq userReq) {
+    public boolean createUser(@NotNull UserReq userReq) {
         LOGGER.info("Current users: " + userRepository.count());
-        if(userReq != null && userReq.email() != null && userReq.username() != null) {
-            if(userRepository.findByEmail(userReq.email()).isPresent()) {
-               return false;
+        if (userReq != null && userReq.email() != null && userReq.username() != null) {
+            if (userRepository.findByEmail(userReq.email()).isPresent()) {
+                LOGGER.info("User with email {} is already exist.", userReq.email());
+                return false;
             }
-            User user=new User(userReq.username(), userReq.email());
+            User user = new User(userReq.username(), userReq.email());
             addUserAndSaveToFile(user);
-            //eventPublisher.publishEvent(new UserCreateEvent(this,user));
+            LOGGER.info("User with Id {} was created successful.", user.getId());
+            eventPublisher.publishEvent(new EntityChangedEvent(user, ReasonOfChanges.CREATED_BY_USER.getValue()));
             return true;
         }
-       return  false;
+        return false;
     }
 
     public boolean updateUser(@NotNull UserReq userReq) {
@@ -128,8 +136,8 @@ public class UserService implements IUserService {
                 User user = userForUpdate.get();
                 user.setEmail(userReq.email());
                 user.setUsername(userReq.username());
-
                 addUserAndSaveToFile(user);
+                eventPublisher.publishEvent(new EntityChangedEvent(user,ReasonOfChanges.UPDATE_OF_DATA.getValue()));
                 return true;
             } else {
                 return false;
@@ -156,6 +164,7 @@ public class UserService implements IUserService {
             throw new RuntimeException("Error saving user data to file: " + e.getMessage());
         }
     }
+
     public void addUserAndSaveToFile(@NotNull User user) {
         if (user.getId() == null) {
             user.setId(UUID.randomUUID());
@@ -163,16 +172,17 @@ public class UserService implements IUserService {
         userRepository.save(user);
         addUserToFile(user);
     }
+
     @Override
-    public boolean deleteUserById(String userIdString) {
+    public boolean deleteUserById(@NotNull String userIdString) {
         try {
             UUID id = UUID.fromString(userIdString);
             Optional<User> userToRemove = getUser(id.toString());
             if (userToRemove.isPresent()) {
-                   userRepository.delete(userToRemove.get());
+                userRepository.delete(userToRemove.get());
                 LOGGER.info("User deleted from database.");
-
-                   return true;
+                eventPublisher.publishEvent(new EntityChangedEvent(userToRemove, ReasonOfChanges.MANUAL_DELETED.getValue()));
+                return true;
             }
         } catch (IllegalArgumentException e) {
             LOGGER.info("Invalid UUID format: " + userIdString);
@@ -196,6 +206,7 @@ public class UserService implements IUserService {
             return false;
         }
     }
+
     public void updateUserFile() {
         try {
             List<User> allUsers = getUsers();
@@ -206,6 +217,7 @@ public class UserService implements IUserService {
             throw new RuntimeException("Error updating user file: " + e.getMessage());
         }
     }
+
     private void writeUsersToFile(List<User> users) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
@@ -216,6 +228,7 @@ public class UserService implements IUserService {
             throw new RuntimeException("Error saving user data to file: " + e.getMessage());
         }
     }
+
     @Override
     public Optional<User> getUserByEmail(String email) {
         System.out.println("Searching for user with email: " + email);

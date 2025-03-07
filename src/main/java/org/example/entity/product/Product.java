@@ -2,6 +2,7 @@ package org.example.entity.product;
 
 import jakarta.persistence.*;
 import org.example.enums.ProductType;
+import org.example.listener.EntityChangesListener;
 
 import java.util.Objects;
 import java.util.UUID;

@@ -3,6 +3,7 @@ package org.example.entity.order;
 import jakarta.persistence.*;
 import org.example.entity.product.Book;
 import org.example.entity.product.Product;
+import org.example.listener.EntityChangesListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ public class OrderDetail extends OrderBase{
     private List<Product> itemList;
     public OrderDetail()
     {
-        itemList=new ArrayList<Product>();
+        itemList=new ArrayList<>();
     }
 
 

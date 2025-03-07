@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import org.example.dto.BaseReq;
 import org.example.entity.product.Electronic;
 import org.example.enums.ProductType;
+import org.example.enums.ReasonOfChanges;
+import org.example.event.EntityChangedEvent;
 import org.example.repository.BookRepository;
 import org.example.repository.ElectronicsRepository;
 import org.example.repository.ProductRepository;
@@ -11,6 +13,7 @@ import org.example.repository.VendorRepository;
 import org.example.service.interfaces.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,14 +34,16 @@ public class ProductService<Product> extends BaseService<org.example.entity.prod
     private final ElectronicsRepository electronicsRepository;
     @Autowired
     private final VendorRepository vendorRepository;
-
+    @Autowired
+    private final ApplicationEventPublisher eventPublisher;
     public ProductService(ProductRepository productRepository,
                           ElectronicsRepository electronicsRepository,
-                          VendorRepository vendorRepository){
+                          VendorRepository vendorRepository, ApplicationEventPublisher eventPublisher){
 
         this.productRepository=productRepository;
         this.electronicsRepository=electronicsRepository;
         this.vendorRepository = vendorRepository;
+        this.eventPublisher = eventPublisher;
     }
     @Transactional
     public org.example.entity.product.Product createItem(BaseReq baseReq) throws IOException, ClassNotFoundException {
@@ -56,10 +61,14 @@ public class ProductService<Product> extends BaseService<org.example.entity.prod
                 case 3:
                     product.setProductType(ProductType.ELECTRONIC);
                     break;
+                default:
+                    product.setProductType(ProductType.PRODUCT);
+                    break;
             }
             product.setAvailable(true);
             try {
                 addEntity( product,  productRepository);
+                eventPublisher.publishEvent(new EntityChangedEvent(product, ReasonOfChanges.CREATED_BY_ADMIN.getValue()));
                 return product;
             } catch (Exception e) {
                 e.printStackTrace();

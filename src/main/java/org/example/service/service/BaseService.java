@@ -73,7 +73,6 @@ public abstract class BaseService<T> {
                 if (parentDir != null && !parentDir.exists()) {
                     parentDir.mkdirs();
                 }
-                // file.getParentFile().mkdirs();
                 if (file.createNewFile()) {
                     LOGGER.info("A new file for items is created by the path: " + file.getAbsolutePath());
                 } else {
