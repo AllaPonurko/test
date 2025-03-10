@@ -1,8 +1,8 @@
 package org.example.entity.product;
 
 import jakarta.persistence.*;
-import org.example.enums.ProductType;
-import org.example.listener.EntityChangesListener;
+import org.example.enums.ProductTypeEnum;
+
 
 import java.util.Objects;
 import java.util.UUID;
@@ -21,7 +21,7 @@ public class Product {
     protected String description;
     protected boolean isAvailable = true;
     @Enumerated(EnumType.STRING)
-    protected ProductType productType;
+    protected ProductTypeEnum productType;
 
 
     public Product() {
@@ -46,11 +46,11 @@ public class Product {
         return price;
     }
 
-    public ProductType getProductType() {
+    public ProductTypeEnum getProductType() {
         return productType;
     }
 
-    public void setProductType(ProductType type) {
+    public void setProductType(ProductTypeEnum type) {
         this.productType = type;
     }
 

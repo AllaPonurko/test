@@ -1,7 +1,7 @@
 package org.example.listener;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.event.UserCreateEvent;
+import org.example.event.UserCreatedEvent;
 import org.example.entity.user.User;
 import org.example.service.notification.EmailService;
 import org.springframework.context.event.EventListener;
@@ -17,7 +17,7 @@ public class UserCreateListener {
     }
 
     @EventListener
-    public void onUserCreated(UserCreateEvent event) {
+    public void onUserCreated(UserCreatedEvent event) {
         User user = event.getUser();
         System.out.println("User created: " + user.toString());
         emailService.sendEmail(user.getEmail(), "Registration was successful: ",user.toString());

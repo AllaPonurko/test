@@ -2,7 +2,6 @@ package org.example.entity.order;
 
 import jakarta.persistence.*;
 import org.example.entity.user.User;
-import org.example.listener.EntityChangesListener;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -17,7 +16,7 @@ public class Order extends OrderBase {
     private User user;  // Foreign key reference to the User entity
 
     @OneToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "orderDetail_id")
+    @JoinColumn(name = "orderDetail_id",nullable = false)
     private OrderDetail orderDetail;//Foreign key reference to the OrderDetail entity
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

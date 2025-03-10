@@ -3,7 +3,7 @@ package org.example.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 
-public enum GenreType {
+public enum GenreTypeEnum {
     DRAMA("DRAMA"),
     DETECTIVE("DETECTIVE"),
     NOVEL("NOVEL"),
@@ -18,7 +18,7 @@ public enum GenreType {
         return value;
     }
 
-    GenreType(String value) {
+    GenreTypeEnum(String value) {
         this.value = value;
     }
 

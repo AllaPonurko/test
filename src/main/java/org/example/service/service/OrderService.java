@@ -5,13 +5,11 @@ import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.dto.OrderDTO;
-import org.example.dto.OrderDetailReq;
 import org.example.dto.OrderReq;
-import org.example.dto.UserReq;
 import org.example.entity.order.Order;
 import org.example.entity.order.OrderDetail;
 import org.example.entity.user.User;
-import org.example.enums.ReasonOfChanges;
+import org.example.enums.ReasonOfChangesEnum;
 import org.example.event.EntityChangedEvent;
 import org.example.repository.OrderRepository;
 import org.example.repository.UserRepository;
@@ -25,7 +23,6 @@ import java.io.IOException;
 import java.io.InvalidClassException;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class OrderService extends BaseService<Order> implements IProductService<Order, OrderReq> {
@@ -96,7 +93,7 @@ public class OrderService extends BaseService<Order> implements IProductService<
                 order.setValid(true);
                 orderRepository.save(order);
                 LOGGER.info("Order with Id {} created successful",order.getId());
-                eventPublisher.publishEvent(new EntityChangedEvent(order, ReasonOfChanges.CREATED_BY_USER.getValue()));
+                eventPublisher.publishEvent(new EntityChangedEvent(order, ReasonOfChangesEnum.CREATED_BY_USER.getValue()));
                 return order;
             }
         } catch (Exception e) {
@@ -116,7 +113,7 @@ public class OrderService extends BaseService<Order> implements IProductService<
         boolean isOrderDelete = false;
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isPresent()) {
-            eventPublisher.publishEvent(new EntityChangedEvent(order,ReasonOfChanges.MANUAL_DELETED.getValue()));
+            eventPublisher.publishEvent(new EntityChangedEvent(order, ReasonOfChangesEnum.MANUAL_DELETED.getValue()));
             orderRepository.delete(order.get());
             LOGGER.info("Order with Id {} deleted successful",order.get().getId());
             isOrderDelete = true;

@@ -1,10 +1,9 @@
 package org.example.entity.product;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Table;
-import org.example.enums.ProductType;
-import org.example.listener.EntityChangesListener;
+
+
 
 @Entity
 @Table(name = "books")

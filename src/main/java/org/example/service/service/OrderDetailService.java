@@ -5,9 +5,8 @@ import jakarta.transaction.Transactional;
 import org.example.dto.OrderDetailReq;
 import org.example.entity.order.OrderDetail;
 import org.example.entity.product.Product;
-import org.example.enums.ReasonOfChanges;
+import org.example.enums.ReasonOfChangesEnum;
 import org.example.event.EntityChangedEvent;
-import org.example.repository.BookRepository;
 import org.example.repository.OrderDetailRepository;
 import org.example.repository.ProductRepository;
 import org.example.service.interfaces.IProductService;
@@ -17,7 +16,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -70,7 +68,7 @@ public class OrderDetailService extends BaseService<OrderDetail>implements IProd
             }
             try {
                 addEntity(orderDetail, orderDetailRepository);
-                eventPublisher.publishEvent(new EntityChangedEvent(orderDetail, ReasonOfChanges.CREATED_BY_USER.getValue()));
+                eventPublisher.publishEvent(new EntityChangedEvent(orderDetail, ReasonOfChangesEnum.CREATED_BY_USER.getValue()));
                 return orderDetail;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -84,7 +82,7 @@ public class OrderDetailService extends BaseService<OrderDetail>implements IProd
       boolean isOrderDetailDelete=false;
       OrderDetail orderDetail=orderDetailRepository.findByUuid(UUID.fromString(orderId));
       if(orderDetail!=null){
-          eventPublisher.publishEvent(new EntityChangedEvent(orderDetail,ReasonOfChanges.MANUAL_DELETED.getValue()));
+          eventPublisher.publishEvent(new EntityChangedEvent(orderDetail, ReasonOfChangesEnum.MANUAL_DELETED.getValue()));
           orderDetailRepository.delete(orderDetail);
           isOrderDetailDelete=true;
       }

@@ -1,9 +1,8 @@
 package org.example.repository;
 
-import org.example.entity.log.LogItemChanged;
+import org.example.entity.log.LogStockItemChanged;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 @Repository
-public interface LogOfChangesRepository extends JpaRepository<LogItemChanged, Long> {
+public interface LogStockItemChangedRepository extends JpaRepository <LogStockItemChanged,Long>{
 }

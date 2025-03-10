@@ -5,9 +5,9 @@ import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.dto.BaseReq;
-import org.example.enums.GenreType;
-import org.example.enums.ProductType;
-import org.example.enums.ReasonOfChanges;
+import org.example.enums.GenreTypeEnum;
+import org.example.enums.ProductTypeEnum;
+import org.example.enums.ReasonOfChangesEnum;
 import org.example.event.BookCreatedEvent;
 import org.example.event.EntityChangedEvent;
 import org.example.handler.ShoWebSocketHandler;
@@ -79,25 +79,25 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
             String genre = "";
             switch (baseReq.genre()) {
                 case 1:
-                    genre = GenreType.DRAMA.toString();
+                    genre = GenreTypeEnum.DRAMA.toString();
                     break;
                 case 2:
-                    genre = GenreType.ADVENTURES.toString();
+                    genre = GenreTypeEnum.ADVENTURES.toString();
                     break;
                 case 3:
-                    genre = GenreType.DETECTIVE.toString();
+                    genre = GenreTypeEnum.DETECTIVE.toString();
                     break;
                 case 4:
-                    genre = GenreType.SCIENCE_FICTION_GENRE.toString();
+                    genre = GenreTypeEnum.SCIENCE_FICTION_GENRE.toString();
                     break;
                 case 5:
-                    genre = GenreType.NOVEL.toString();
+                    genre = GenreTypeEnum.NOVEL.toString();
                     break;
                 case 6:
-                    genre = GenreType.POETRY.toString();
+                    genre = GenreTypeEnum.POETRY.toString();
                     break;
                 case 7:
-                    genre = GenreType.SHORT_STORY.toString();
+                    genre = GenreTypeEnum.SHORT_STORY.toString();
                     break;
                 default:
                     genre="Not defined";
@@ -106,13 +106,13 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
             Book book = new Book(baseReq.name(), baseReq.price(),
                     baseReq.description(), genre, baseReq.author());
             book.setAvailable(true);
-            book.setProductType(ProductType.BOOK);
+            book.setProductType(ProductTypeEnum.BOOK);
             LOGGER.info("Book is created successfully " + book.toString());
             eventPublisher.publishEvent(new BookCreatedEvent(this, book));
             try {
                 addEntity(book, bookRepository);
                 LOGGER.info("Book with {}",book.getId()+" is added successfully ");
-                eventPublisher.publishEvent(new EntityChangedEvent(book,ReasonOfChanges.CREATED_BY_ADMIN.getValue()));
+                eventPublisher.publishEvent(new EntityChangedEvent(book, ReasonOfChangesEnum.CREATED_BY_ADMIN.getValue()));
                 return book;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -129,7 +129,7 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
         if (book.isPresent()) {
             bookRepository.delete(book.get());
             isBookDelete = true;
-            eventPublisher.publishEvent(new EntityChangedEvent(book,ReasonOfChanges.MANUAL_DELETED.getValue()));
+            eventPublisher.publishEvent(new EntityChangedEvent(book, ReasonOfChangesEnum.MANUAL_DELETED.getValue()));
         } else LOGGER.warn("Book with id " + uuid + " is not exist");
         return isBookDelete;
     }

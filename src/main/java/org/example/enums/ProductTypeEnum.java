@@ -1,19 +1,15 @@
 package org.example.enums;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Entity;
-import org.example.enums.interfaces.CodeProvider;
 
-public enum ProductType  {
+public enum ProductTypeEnum {
     BOOK("BOOK"),
     VENDOR("VENDOR"),
     ELECTRONIC("ELECTRONIC"),
     PRODUCT("PRODUCT");
 
     private String value;
-    ProductType(String value) {
+    ProductTypeEnum(String value) {
         this.value = value;
     }
     @JsonValue

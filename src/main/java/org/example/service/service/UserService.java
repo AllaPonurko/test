@@ -7,7 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.dto.UserReq;
 import org.example.entity.user.User;
-import org.example.enums.ReasonOfChanges;
+import org.example.enums.ReasonOfChangesEnum;
 import org.example.event.EntityChangedEvent;
 import org.example.repository.UserRepository;
 import org.jetbrains.annotations.NotNull;
@@ -123,7 +123,7 @@ public class UserService implements IUserService {
             User user = new User(userReq.username(), userReq.email());
             addUserAndSaveToFile(user);
             LOGGER.info("User with Id {} was created successful.", user.getId());
-            eventPublisher.publishEvent(new EntityChangedEvent(user, ReasonOfChanges.CREATED_BY_USER.getValue()));
+            eventPublisher.publishEvent(new EntityChangedEvent(user, ReasonOfChangesEnum.CREATED_BY_USER.getValue()));
             return true;
         }
         return false;
@@ -137,7 +137,7 @@ public class UserService implements IUserService {
                 user.setEmail(userReq.email());
                 user.setUsername(userReq.username());
                 addUserAndSaveToFile(user);
-                eventPublisher.publishEvent(new EntityChangedEvent(user,ReasonOfChanges.UPDATE_OF_DATA.getValue()));
+                eventPublisher.publishEvent(new EntityChangedEvent(user, ReasonOfChangesEnum.UPDATE_OF_DATA.getValue()));
                 return true;
             } else {
                 return false;
@@ -181,7 +181,7 @@ public class UserService implements IUserService {
             if (userToRemove.isPresent()) {
                 userRepository.delete(userToRemove.get());
                 LOGGER.info("User deleted from database.");
-                eventPublisher.publishEvent(new EntityChangedEvent(userToRemove, ReasonOfChanges.MANUAL_DELETED.getValue()));
+                eventPublisher.publishEvent(new EntityChangedEvent(userToRemove, ReasonOfChangesEnum.MANUAL_DELETED.getValue()));
                 return true;
             }
         } catch (IllegalArgumentException e) {

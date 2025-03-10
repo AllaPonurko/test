@@ -3,7 +3,7 @@ package org.example.entity.order;
 import jakarta.persistence.*;
 import org.example.entity.product.Book;
 import org.example.entity.product.Product;
-import org.example.listener.EntityChangesListener;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 @Table(name = "order_details")
 public class OrderDetail extends OrderBase{
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JoinTable(
             name = "order_product",
             joinColumns = @JoinColumn(name = "order_id"),

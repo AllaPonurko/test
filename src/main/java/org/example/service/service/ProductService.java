@@ -3,10 +3,9 @@ package org.example.service.service;
 import jakarta.transaction.Transactional;
 import org.example.dto.BaseReq;
 import org.example.entity.product.Electronic;
-import org.example.enums.ProductType;
-import org.example.enums.ReasonOfChanges;
+import org.example.enums.ProductTypeEnum;
+import org.example.enums.ReasonOfChangesEnum;
 import org.example.event.EntityChangedEvent;
-import org.example.repository.BookRepository;
 import org.example.repository.ElectronicsRepository;
 import org.example.repository.ProductRepository;
 import org.example.repository.VendorRepository;
@@ -53,22 +52,22 @@ public class ProductService<Product> extends BaseService<org.example.entity.prod
             int kod=baseReq.productType();
             switch ( kod){
                 case 1:
-                    product.setProductType(ProductType.BOOK);
+                    product.setProductType(ProductTypeEnum.BOOK);
                     break;
                 case 2:
-                    product.setProductType(ProductType.VENDOR);
+                    product.setProductType(ProductTypeEnum.VENDOR);
                     break;
                 case 3:
-                    product.setProductType(ProductType.ELECTRONIC);
+                    product.setProductType(ProductTypeEnum.ELECTRONIC);
                     break;
                 default:
-                    product.setProductType(ProductType.PRODUCT);
+                    product.setProductType(ProductTypeEnum.PRODUCT);
                     break;
             }
             product.setAvailable(true);
             try {
                 addEntity( product,  productRepository);
-                eventPublisher.publishEvent(new EntityChangedEvent(product, ReasonOfChanges.CREATED_BY_ADMIN.getValue()));
+                eventPublisher.publishEvent(new EntityChangedEvent(product, ReasonOfChangesEnum.CREATED_BY_ADMIN.getValue()));
                 return product;
             } catch (Exception e) {
                 e.printStackTrace();

@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.entity.order.Order;
-import org.example.enums.ReasonOfChanges;
+import org.example.enums.ReasonOfChangesEnum;
 import org.example.event.EntityChangedEvent;
 import org.example.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class PayService {
             if (simulatePayment()) {
                 order.setPayed(true);
                 orderRepository.save(order);
-                eventPublisher.publishEvent(new EntityChangedEvent(order, ReasonOfChanges.UPDATED_PAY.getValue()));
+                eventPublisher.publishEvent(new EntityChangedEvent(order, ReasonOfChangesEnum.UPDATED_PAY.getValue()));
                 LOGGER.info("Order " + orderId + " was paid successfully (simulated).");
                 return true;
             }

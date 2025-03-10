@@ -1,7 +1,7 @@
 package org.example.entity.product;
 
 import jakarta.persistence.*;
-import org.example.listener.EntityChangesListener;
+
 
 @Entity
 @Table(name="electronics")
