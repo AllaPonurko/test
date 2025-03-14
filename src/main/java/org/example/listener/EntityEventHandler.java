@@ -2,7 +2,7 @@ package org.example.listener;
 
 import org.example.entity.log.LogItemChanged;
 import org.example.enums.EntityChangesTypeEnum;
-import org.example.enums.ReasonOfChangesEnum;
+import org.example.enums.TypeOfChangesEnum;
 import org.example.event.EntityChangedEvent;
 import org.example.repository.LogOfChangesRepository;
 import org.example.service.log.LogItemChangedService;
@@ -24,14 +24,14 @@ public class EntityEventHandler {
         Object entity = event.getSource();
         String reason = event.getReason();
         LogItemChanged logItemChanged = logItemChangedService.writeLog(entity, reason);
-        ReasonOfChangesEnum kind = ReasonOfChangesEnum.valueOf(event.getReason());
-        if (kind.equals(ReasonOfChangesEnum.CREATED_BY_ADMIN)||kind.equals(ReasonOfChangesEnum.CREATED_BY_USER)) {
+        TypeOfChangesEnum kind = TypeOfChangesEnum.valueOf(event.getReason());
+        if (kind.equals(TypeOfChangesEnum.CREATED_BY_ADMIN)||kind.equals(TypeOfChangesEnum.CREATED_BY_USER)) {
           logItemChanged.setType(EntityChangesTypeEnum.CREATE.getValue());
         }
-        if(kind.equals(ReasonOfChangesEnum.MANUAL_DELETED)||kind.equals(ReasonOfChangesEnum.TIMEOUT_DELETED)){
+        if(kind.equals(TypeOfChangesEnum.MANUAL_DELETED)||kind.equals(TypeOfChangesEnum.TIMEOUT_DELETED)){
             logItemChanged.setType(EntityChangesTypeEnum.DELETE.getValue());
         }
-        if(kind.equals(ReasonOfChangesEnum.UPDATED_PAY)){
+        if(kind.equals(TypeOfChangesEnum.UPDATED_PAYED)){
             logItemChanged.setType(EntityChangesTypeEnum.UPDATE.getValue());
         }
         logOfChangesRepository.save(logItemChanged);

@@ -11,25 +11,22 @@ import java.util.List;
 @Entity
 @Table(name = "order_details")
 public class OrderDetail extends OrderBase{
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "order_product",
-            joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id")
-    )
 
-    private List<Product> itemList;
-    public OrderDetail()
-    {
-        itemList=new ArrayList<>();
+@OneToMany(mappedBy = "orderDetail", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+private List<OrderProduct> orderProducts = new ArrayList<>();
+
+    public List<OrderProduct> getOrderProducts() {
+        return orderProducts;
     }
 
-
-    public List<Product> getItemList() {
-        return itemList;
+    public void addOrderProduct(OrderProduct orderProduct) {
+        orderProducts.add(orderProduct);
+        orderProduct.setOrderDetail(this);
     }
 
-    public void setItemList(List<Product> itemList) {
-        this.itemList = itemList;
+    public void removeOrderProduct(OrderProduct orderProduct) {
+        orderProducts.remove(orderProduct);
+        orderProduct.setOrderDetail(null);
     }
+
 }

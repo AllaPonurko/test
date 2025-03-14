@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.example.enums.ProductTypeEnum;
 
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ public class Product {
     protected UUID id;
 
     protected String name;
-    protected double price;
+    protected BigDecimal price;
 
     protected String description;
     protected boolean isAvailable = true;
@@ -27,7 +28,7 @@ public class Product {
     public Product() {
     }
 
-    public Product(String name, double price, String description) {
+    public Product(String name, BigDecimal price, String description) {
         this.name = name;
         this.price = price;
         this.description = description;
@@ -42,7 +43,7 @@ public class Product {
         this.name = name;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
@@ -54,7 +55,7 @@ public class Product {
         this.productType = type;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

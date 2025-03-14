@@ -2,6 +2,8 @@ package org.example.entity.product;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 
 @Entity
 @Table(name="electronics")
@@ -10,7 +12,7 @@ public class Electronic extends Product{
     @JoinColumn(name = "vendor_id", nullable = false)
     private Vendor vendor;
     //Constructor
-    public Electronic(String name, double price, String description, Vendor vendor,int type)
+    public Electronic(String name, BigDecimal price, String description, Vendor vendor, int type)
     {
         super(name,  price, description);
         this.vendor=vendor;

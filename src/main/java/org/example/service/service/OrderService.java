@@ -8,11 +8,17 @@ import org.example.dto.OrderDTO;
 import org.example.dto.OrderReq;
 import org.example.entity.order.Order;
 import org.example.entity.order.OrderDetail;
+import org.example.entity.order.OrderWarehouse;
 import org.example.entity.user.User;
-import org.example.enums.ReasonOfChangesEnum;
+import org.example.entity.warehouse.Warehouse;
+import org.example.enums.OrderStatusEnum;
+import org.example.enums.TypeOfChangesEnum;
 import org.example.event.EntityChangedEvent;
+import org.example.event.OrderEvent;
 import org.example.repository.OrderRepository;
+import org.example.repository.OrderWarehouseRepository;
 import org.example.repository.UserRepository;
+import org.example.repository.WarehouseRepository;
 import org.example.service.interfaces.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,13 +43,23 @@ public class OrderService extends BaseService<Order> implements IProductService<
     private final UserRepository userRepository;
     @Autowired
     private final ApplicationEventPublisher eventPublisher;
+    @Autowired
+    private final StockItemService stockItemService;
+    @Autowired
+    private final WarehouseRepository warehouseRepository;
+    @Autowired
+    private final OrderWarehouseRepository orderWarehouseRepository;
+
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public OrderService(OrderRepository orderRepository, OrderDetailService orderDetailService, UserRepository userRepository, ApplicationEventPublisher eventPublisher) {
+    public OrderService(OrderRepository orderRepository, OrderDetailService orderDetailService, UserRepository userRepository, ApplicationEventPublisher eventPublisher, StockItemService stockItemService, WarehouseRepository warehouseRepository, OrderWarehouseRepository orderWarehouseRepository) {
         this.orderRepository = orderRepository;
         this.orderDetailService = orderDetailService;
         this.userRepository = userRepository;
         this.eventPublisher = eventPublisher;
+        this.stockItemService = stockItemService;
+        this.warehouseRepository = warehouseRepository;
+        this.orderWarehouseRepository = orderWarehouseRepository;
     }
 
     @PostConstruct
@@ -64,7 +80,7 @@ public class OrderService extends BaseService<Order> implements IProductService<
     }
 
     @Override
-    public Order createItem(OrderReq baseDTO) throws IOException, ClassNotFoundException, RuntimeException {
+    public Order createItem(OrderReq baseDTO) throws  RuntimeException {
         return null;
     }
 
@@ -75,25 +91,37 @@ public class OrderService extends BaseService<Order> implements IProductService<
      * @throws IOException
      */
     @Transactional
-    public Order createOrder(OrderReq orderReq) throws IOException {
+    public Order createOrder(OrderReq orderReq ) throws IOException {
         try {
-            if (orderReq != null) {
+
+            if (orderReq != null ) {
                 LOGGER.info("Start of order's creating...");
                 Order order = new Order();
-                OrderDetail orderDetail = orderDetailService.createOrderDetail(orderReq.orderDetailReq());
+                OrderDetail orderDetail = orderDetailService.createOrderDetail(orderReq.orderDetailReq(),orderReq.warehouseLocation());
                 if (orderDetail != null) {
                     order.setOrderDetail(orderDetail);
-                    order.setTotalPrice(BigDecimal.valueOf(getTotalPrice(orderDetail)));
+                    order.setTotalPrice(getTotalPrice(orderDetail));
                 }
                 Optional<User> existUser = userRepository.findById(UUID.fromString(orderReq.userId()));
-                if (existUser.get() != null) {
+                if (existUser.isPresent()) {
                     order.setUser(existUser.get());
+                } else {
+                    LOGGER.info("User not found with id: " + orderReq.userId());
+                    return null;
                 }
                 order.setPayed(false);
                 order.setValid(true);
                 orderRepository.save(order);
+                Warehouse warehouse=warehouseRepository.findWarehouseByLocationNumber(orderReq.warehouseLocation()).orElse(null);
+                orderDetail.getOrderProducts().forEach(orderProduct -> {
+                    OrderWarehouse orderWarehouse=new OrderWarehouse(orderProduct.getProduct(),
+                            warehouse,order, orderProduct.getQuantity());
+                    orderWarehouseRepository.save(orderWarehouse);
+                    LOGGER.info("OrderWarehouse with Id {} created successful",orderWarehouse.getId());
+                    eventPublisher.publishEvent(new OrderEvent(orderWarehouse, OrderStatusEnum.PENDING.getValue()));
+                });
                 LOGGER.info("Order with Id {} created successful",order.getId());
-                eventPublisher.publishEvent(new EntityChangedEvent(order, ReasonOfChangesEnum.CREATED_BY_USER.getValue()));
+                eventPublisher.publishEvent(new EntityChangedEvent(order, TypeOfChangesEnum.CREATED_BY_USER.getValue()));
                 return order;
             }
         } catch (Exception e) {
@@ -102,18 +130,21 @@ public class OrderService extends BaseService<Order> implements IProductService<
         return null;
     }
 
-    private double getTotalPrice(OrderDetail orderDetail) {
-        return orderDetail.getItemList().stream()
-                .mapToDouble(item -> item.getPrice())
-                .sum();
+    private BigDecimal getTotalPrice(OrderDetail orderDetail) {
+        BigDecimal totalAmount = orderDetail.getOrderProducts().stream()
+                .map(orderProduct -> orderProduct.getProduct()
+                        .getPrice()
+                        .multiply(BigDecimal.valueOf(orderProduct.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return totalAmount;
     }
 
     @Transactional
     public boolean deleteOrder(UUID orderId) {
         boolean isOrderDelete = false;
         Optional<Order> order = orderRepository.findById(orderId);
-        if (order.isPresent()) {
-            eventPublisher.publishEvent(new EntityChangedEvent(order, ReasonOfChangesEnum.MANUAL_DELETED.getValue()));
+        if (order.isPresent()&&!order.get().isPayed()) {
+            eventPublisher.publishEvent(new EntityChangedEvent(order, TypeOfChangesEnum.MANUAL_DELETED.getValue()));
             orderRepository.delete(order.get());
             LOGGER.info("Order with Id {} deleted successful",order.get().getId());
             isOrderDelete = true;

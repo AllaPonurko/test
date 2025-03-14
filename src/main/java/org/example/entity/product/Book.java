@@ -3,6 +3,7 @@ package org.example.entity.product;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
+import java.math.BigDecimal;
 
 
 @Entity
@@ -14,7 +15,7 @@ public class Book extends Product {
     private String author;
 
     //Constructor
-    public Book(String name, double price, String description, String genre, String author) {
+    public Book(String name, BigDecimal price, String description, String genre, String author) {
         super(name, price, description);
         this.author = author;
         this.genre = genre;

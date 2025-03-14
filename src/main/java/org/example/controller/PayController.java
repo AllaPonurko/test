@@ -24,6 +24,6 @@ public class PayController {
             return ResponseEntity.ok("Payment by order with orderId "+orderId+" is successful");
         }
         LOGGER.info("Payment by order with orderId {}",orderId+" is failed");
-        return ResponseEntity.status(500).body("Payment is failed");
+        return ResponseEntity.status(400).body("Payment is failed");
     }
 }

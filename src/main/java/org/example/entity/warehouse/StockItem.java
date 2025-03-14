@@ -29,10 +29,22 @@ public class StockItem {
     private Warehouse warehouse;
 
     @Column(name = "quantity", nullable = false)
-    private int quantity;
+    private long quantity;
 
     @Column(name = "total_value", nullable = false)
     private BigDecimal totalValue;
+    @Column(name = "reserved", nullable = true)
+    private long reserved;
+    @Column(name = "is_reserved")
+    private boolean isReserved = false;
+
+    public boolean getIsReserved() {
+        return isReserved;
+    }
+
+    public void setIsReserved(boolean isReserved) {
+        this.isReserved = isReserved;
+    }
 
     public Warehouse getWarehouse() {
         return warehouse;
@@ -42,21 +54,21 @@ public class StockItem {
         this.warehouse = warehouse;
     }
 
-    public int getQuantity() {
+    public long getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(long quantity) {
         this.quantity = quantity;
     }
 
     public BigDecimal getTotalValue() {
 
-        return (BigDecimal.valueOf(this.product.getPrice())).multiply(new BigDecimal(this.quantity));
+        return (this.product.getPrice()).multiply(new BigDecimal(this.quantity));
     }
 
-    public BigDecimal getNewTotalValue(double price, int quantity) {
-        return (BigDecimal.valueOf(price).multiply(new BigDecimal(quantity)));
+    public BigDecimal getNewTotalValue(BigDecimal price, long quantity) {
+        return (price.multiply(new BigDecimal(quantity)));
     }
 
     public void setTotalValue(BigDecimal totalValue) {
@@ -69,5 +81,13 @@ public class StockItem {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public long getReserved() {
+        return reserved;
+    }
+
+    public void setReserved(long reserved) {
+        this.reserved = reserved;
     }
 }

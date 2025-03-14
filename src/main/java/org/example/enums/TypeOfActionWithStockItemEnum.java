@@ -1,12 +1,14 @@
 package org.example.enums;
 
-public enum TypeOfActionWithStockItem {
+public enum TypeOfActionWithStockItemEnum {
     RESTOCK("RESTOCK"),
     WITHDRAW("WITHDRAW"),
-    ZERO_OF_INVENTORY("ZERO_OF_INVENTORY");
+    ZERO_OF_INVENTORY("ZERO_OF_INVENTORY"),
+    RESERVED("RESERVED");
+
     private String value;
 
-    TypeOfActionWithStockItem(String value) {
+    TypeOfActionWithStockItemEnum(String value) {
         this.value = value;
     }
 

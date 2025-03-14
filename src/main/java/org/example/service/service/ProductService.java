@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import org.example.dto.BaseReq;
 import org.example.entity.product.Electronic;
 import org.example.enums.ProductTypeEnum;
-import org.example.enums.ReasonOfChangesEnum;
+import org.example.enums.TypeOfChangesEnum;
 import org.example.event.EntityChangedEvent;
 import org.example.repository.ElectronicsRepository;
 import org.example.repository.ProductRepository;
@@ -46,7 +46,7 @@ public class ProductService<Product> extends BaseService<org.example.entity.prod
     }
     @Transactional
     public org.example.entity.product.Product createItem(BaseReq baseReq) throws IOException, ClassNotFoundException {
-        if(!baseReq.name().isEmpty() && !(baseReq.price() ==0)&&!(baseReq.productType()==0)){
+        if(!baseReq.name().isEmpty() && !(baseReq.price() !=null)&&!(baseReq.productType()==0)){
             org.example.entity.product.Product product = new org.example.entity.product.Product(baseReq.name(), baseReq.price(),
                     baseReq.description());
             int kod=baseReq.productType();
@@ -67,7 +67,7 @@ public class ProductService<Product> extends BaseService<org.example.entity.prod
             product.setAvailable(true);
             try {
                 addEntity( product,  productRepository);
-                eventPublisher.publishEvent(new EntityChangedEvent(product, ReasonOfChangesEnum.CREATED_BY_ADMIN.getValue()));
+                eventPublisher.publishEvent(new EntityChangedEvent(product, TypeOfChangesEnum.CREATED_BY_ADMIN.getValue()));
                 return product;
             } catch (Exception e) {
                 e.printStackTrace();

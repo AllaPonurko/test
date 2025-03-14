@@ -1,11 +1,13 @@
 package org.example.entity.order;
 
 import jakarta.persistence.*;
+import org.example.entity.log.LogOrderChanged;
 import org.example.entity.user.User;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -14,7 +16,10 @@ public class Order extends OrderBase {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;  // Foreign key reference to the User entity
-
+    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<OrderWarehouse> orderWarehouses;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LogOrderChanged> logOrderChanges;
     @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "orderDetail_id",nullable = false)
     private OrderDetail orderDetail;//Foreign key reference to the OrderDetail entity

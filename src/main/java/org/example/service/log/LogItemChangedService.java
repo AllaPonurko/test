@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -23,15 +24,21 @@ public class LogItemChangedService<T> {
     @Transactional
     public LogItemChanged writeLog(T object, String reason) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         if (object != null) {
-            Method getIdMethod = object.getClass().getMethod("getId");
-            UUID entityId = (UUID) getIdMethod.invoke(object);
-            LogItemChanged logItemChanged = new LogItemChanged();
-            logItemChanged.setName(object.getClass().getSimpleName());
-            logItemChanged.setTimeOfChange(LocalDateTime.now());
-            logItemChanged.setEntityId(entityId);
-            logItemChanged.setReason(reason);
-            logOfChangesRepository.save(logItemChanged);
-            return logItemChanged;
+            if (object instanceof Optional<?>) {
+                Optional<?> optionalObject = (Optional<?>) object;
+                if (optionalObject.isPresent()) {
+                    object = (T) optionalObject.get();  // Розпаковуємо об'єкт
+                }
+            }
+                Method getIdMethod = object.getClass().getMethod("getId");
+                UUID entityId = (UUID) getIdMethod.invoke(object);
+                LogItemChanged logItemChanged = new LogItemChanged();
+                logItemChanged.setName(object.getClass().getSimpleName());
+                logItemChanged.setTimeOfChange(LocalDateTime.now());
+                logItemChanged.setEntityId(entityId);
+                logItemChanged.setReason(reason);
+                logOfChangesRepository.save(logItemChanged);
+                return logItemChanged;
         }
         return null;
     }

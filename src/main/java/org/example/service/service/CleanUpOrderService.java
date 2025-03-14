@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.entity.order.Order;
-import org.example.enums.ReasonOfChangesEnum;
+import org.example.enums.TypeOfChangesEnum;
 import org.example.event.EntityChangedEvent;
 import org.example.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +22,14 @@ public class CleanUpOrderService {
     private final OrderRepository orderRepository;
     @Autowired
     private final ApplicationEventPublisher eventPublisher;
+    @Autowired
+    private final StockItemService stockItemService;
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public CleanUpOrderService(OrderRepository orderRepository, ApplicationEventPublisher eventPublisher) {
+    public CleanUpOrderService(OrderRepository orderRepository, ApplicationEventPublisher eventPublisher, StockItemService stockItemService) {
         this.orderRepository = orderRepository;
         this.eventPublisher = eventPublisher;
+        this.stockItemService = stockItemService;
     }
 
     @Transactional
@@ -35,7 +38,10 @@ public class CleanUpOrderService {
         LocalDateTime currentTime = LocalDateTime.now().minusHours(3);
         List<Order> orderList = orderRepository.findUnpaidOrdersOlderThan(currentTime);
         if (!orderList.isEmpty()) {
-            orderList.forEach(order -> eventPublisher.publishEvent(new EntityChangedEvent(order, ReasonOfChangesEnum.TIMEOUT_DELETED.getValue())));
+            orderList.forEach(order -> {
+                stockItemService.withdrawProductAfterPayOrDelete(order,TypeOfChangesEnum.TIMEOUT_DELETED.getValue());
+                eventPublisher.publishEvent(new EntityChangedEvent(order, TypeOfChangesEnum.TIMEOUT_DELETED.getValue()));
+            });
             orderRepository.deleteAll(orderList);
             LOGGER.info("Orders with time of creating older {}", currentTime + " are deleted successful.");
         }

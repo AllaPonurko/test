@@ -1,11 +1,15 @@
 package org.example.service.service;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.example.config.LocationConfig;
 import org.example.dto.OrderDetailReq;
+import org.example.dto.StockItemReq;
 import org.example.entity.order.OrderDetail;
+import org.example.entity.order.OrderProduct;
 import org.example.entity.product.Product;
-import org.example.enums.ReasonOfChangesEnum;
+import org.example.enums.TypeOfChangesEnum;
 import org.example.event.EntityChangedEvent;
 import org.example.repository.OrderDetailRepository;
 import org.example.repository.ProductRepository;
@@ -29,12 +33,17 @@ public class OrderDetailService extends BaseService<OrderDetail>implements IProd
     private final ApplicationEventPublisher eventPublisher;
     @Autowired
     private  final ProductRepository productRepository;
+    @Autowired
+    private final StockItemService stockItemService;
+    @Autowired
+    private LocationConfig locationConfig;
     @Value("${orderDetail.data.file}")
     private String orderDetailDataFile;
-    public OrderDetailService(OrderDetailRepository orderDetailRepository, ApplicationEventPublisher eventPublisher, ProductRepository productRepository) {
+    public OrderDetailService(OrderDetailRepository orderDetailRepository, ApplicationEventPublisher eventPublisher, ProductRepository productRepository, StockItemService stockItemService) {
         this.orderDetailRepository = orderDetailRepository;
         this.eventPublisher = eventPublisher;
         this.productRepository = productRepository;
+        this.stockItemService = stockItemService;
     }
     @PostConstruct
     public void init() throws IOException, ClassNotFoundException {
@@ -53,22 +62,29 @@ public class OrderDetailService extends BaseService<OrderDetail>implements IProd
     }
 
     @Override
-    public OrderDetail createItem(OrderDetailReq baseDTO) throws IOException, ClassNotFoundException, RuntimeException {
+    public OrderDetail createItem(OrderDetailReq baseDTO) throws  RuntimeException {
         return null;
     }
 
 
     @Transactional
-    public OrderDetail createOrderDetail(OrderDetailReq<Product> orderDetailReq) {
-        if (orderDetailReq != null && !orderDetailReq.uuidList().isEmpty()) {
+    public OrderDetail createOrderDetail(OrderDetailReq orderDetailReq, int warehouseLocation) {
+        if (orderDetailReq == null || warehouseLocation < locationConfig.getMinWarehouseLocation()
+                || warehouseLocation > locationConfig.getMaxWarehouseLocation()){
+            return null;
+        }
+        if (orderDetailReq != null && !orderDetailReq.productList().isEmpty()) {
             OrderDetail orderDetail = new OrderDetail();
-            for (UUID id : orderDetailReq.uuidList()) {
-                Product item=productRepository.findById(id).get();
-                orderDetail.getItemList().add(item);
+            orderDetailRepository.save(orderDetail);
+            for (var prod : orderDetailReq.productList()) {
+                Product item=productRepository.findById(prod.idProduct()).orElseThrow(() -> new EntityNotFoundException("Product not found for ID: " + prod.idProduct()));
+                StockItemReq stockItemReq = new StockItemReq(item.getId().toString(),warehouseLocation,(int)prod.quantity());
+                if(stockItemService.isProductReserved(stockItemReq))
+                orderDetail.addOrderProduct(new OrderProduct(orderDetail,item,prod.quantity()));
             }
             try {
                 addEntity(orderDetail, orderDetailRepository);
-                eventPublisher.publishEvent(new EntityChangedEvent(orderDetail, ReasonOfChangesEnum.CREATED_BY_USER.getValue()));
+                eventPublisher.publishEvent(new EntityChangedEvent(orderDetail, TypeOfChangesEnum.CREATED_BY_USER.getValue()));
                 return orderDetail;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -82,7 +98,7 @@ public class OrderDetailService extends BaseService<OrderDetail>implements IProd
       boolean isOrderDetailDelete=false;
       OrderDetail orderDetail=orderDetailRepository.findByUuid(UUID.fromString(orderId));
       if(orderDetail!=null){
-          eventPublisher.publishEvent(new EntityChangedEvent(orderDetail, ReasonOfChangesEnum.MANUAL_DELETED.getValue()));
+          eventPublisher.publishEvent(new EntityChangedEvent(orderDetail, TypeOfChangesEnum.MANUAL_DELETED.getValue()));
           orderDetailRepository.delete(orderDetail);
           isOrderDetailDelete=true;
       }

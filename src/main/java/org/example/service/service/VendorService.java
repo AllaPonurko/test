@@ -5,7 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.dto.BaseReq;
 import org.example.entity.product.Vendor;
-import org.example.enums.ReasonOfChangesEnum;
+import org.example.enums.TypeOfChangesEnum;
 import org.example.event.EntityChangedEvent;
 import org.example.repository.VendorRepository;
 import org.example.service.interfaces.IProductService;
@@ -83,7 +83,7 @@ public class VendorService extends BaseService<Vendor>
                 vendor.setCountry(baseReq.country());
                 addEntity(vendor, vendorRepository);
                 LOGGER.info("Vendor with name {} was created successful",vendor.getName());
-                eventPublisher.publishEvent(new EntityChangedEvent(vendor, ReasonOfChangesEnum.CREATED_BY_ADMIN.getValue()));
+                eventPublisher.publishEvent(new EntityChangedEvent(vendor, TypeOfChangesEnum.CREATED_BY_ADMIN.getValue()));
                 return vendor;
             } catch (IOException e) {
                 e.printStackTrace();

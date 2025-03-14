@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.example.dto.BaseReq;
 import org.example.enums.GenreTypeEnum;
 import org.example.enums.ProductTypeEnum;
-import org.example.enums.ReasonOfChangesEnum;
+import org.example.enums.TypeOfChangesEnum;
 import org.example.event.BookCreatedEvent;
 import org.example.event.EntityChangedEvent;
 import org.example.handler.ShoWebSocketHandler;
@@ -75,7 +75,7 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
     @Transactional
     public Book createItem(BaseReq baseReq) throws IOException, ClassNotFoundException {
         if (!baseReq.name().isEmpty() && baseReq.genre() != 0
-                && !baseReq.author().isEmpty() && !(baseReq.price() == 0)) {
+                && !baseReq.author().isEmpty() && !(baseReq.price() !=null)) {
             String genre = "";
             switch (baseReq.genre()) {
                 case 1:
@@ -112,7 +112,7 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
             try {
                 addEntity(book, bookRepository);
                 LOGGER.info("Book with {}",book.getId()+" is added successfully ");
-                eventPublisher.publishEvent(new EntityChangedEvent(book, ReasonOfChangesEnum.CREATED_BY_ADMIN.getValue()));
+                eventPublisher.publishEvent(new EntityChangedEvent(book, TypeOfChangesEnum.CREATED_BY_ADMIN.getValue()));
                 return book;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -129,7 +129,7 @@ public class BookService extends BaseService<Book> implements IProductService<Bo
         if (book.isPresent()) {
             bookRepository.delete(book.get());
             isBookDelete = true;
-            eventPublisher.publishEvent(new EntityChangedEvent(book, ReasonOfChangesEnum.MANUAL_DELETED.getValue()));
+            eventPublisher.publishEvent(new EntityChangedEvent(book, TypeOfChangesEnum.MANUAL_DELETED.getValue()));
         } else LOGGER.warn("Book with id " + uuid + " is not exist");
         return isBookDelete;
     }

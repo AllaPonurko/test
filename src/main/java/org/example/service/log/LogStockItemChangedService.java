@@ -1,5 +1,6 @@
 package org.example.service.log;
 
+import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.entity.log.LogStockItemChanged;
@@ -21,17 +22,21 @@ public class LogStockItemChangedService {
         this.logStockItemChangedRepository = logStockItemChangedRepository;
     }
 
+    @Transactional
     public void writeLog(Object object, String type) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         if (object != null) {
             LogStockItemChanged logStockItemChanged = new LogStockItemChanged();
             Method getIdMethod = object.getClass().getMethod("getId");
-            Method getUUIDMethod=object.getClass().getMethod("getProduct").getClass().getMethod("getId");
-            UUID productId=(UUID) getUUIDMethod.invoke(object);
-            logStockItemChanged.setProductId(productId);
-            long stockItemId=(long) getIdMethod.invoke(object);
+            long stockItemId = (long) getIdMethod.invoke(object);
             logStockItemChanged.setStockItemId(stockItemId);
+            Method getProduct = object.getClass().getMethod("getProduct");
+            Object product = getProduct.invoke(object);
+            Method getUUIDMethod = product.getClass().getMethod("getId");
+            UUID productId = (UUID) getUUIDMethod.invoke(product);
+            logStockItemChanged.setProductId(productId);
+
             logStockItemChanged.setType(type);
-            logStockItemChangedRepository.save(logStockItemChanged) ;
+            logStockItemChangedRepository.save(logStockItemChanged);
         }
 
     }
