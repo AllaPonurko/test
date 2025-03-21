@@ -1,7 +1,9 @@
 package org.example.entity.user;
 
 import jakarta.persistence.*;
+import org.example.entity.InterestTopic;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -13,11 +15,14 @@ public class User {
     private UUID id;
     private String username;
     private String email;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InterestTopic> listOfInterested;
 
     public User() {
 
     }
-    public User( String username, String email) {
+
+    public User(String username, String email) {
 
         this.username = username;
         this.email = email;
@@ -46,6 +51,7 @@ public class User {
     public void setId(UUID id) {
         this.id = id;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -53,16 +59,27 @@ public class User {
         User user = (User) o;
         return Objects.equals(id, user.id);
     }
+
     @Override
-    public  String toString()
-    {return
-        "  {" + "id=" + getId() +
-                ", username='" + getUsername() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                '}';
+    public String toString() {
+        return
+                "  {" + "id=" + getId() +
+                        ", username='" + getUsername() + '\'' +
+                        ", email='" + getEmail() + '\'' +
+                        '}';
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+
+    public List<InterestTopic> getListOfInterested() {
+        return listOfInterested;
+    }
+
+    public void setListOfInterested(List<InterestTopic> listOfInterested) {
+        this.listOfInterested = listOfInterested;
     }
 }

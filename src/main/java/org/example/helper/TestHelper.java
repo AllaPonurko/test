@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 
 @Service
 public class TestHelper {
@@ -17,11 +18,11 @@ public class TestHelper {
     }
     public Book createBook() throws IOException, ClassNotFoundException {
        var newBook= new BaseReq("NewBook",
-                21.00,
+               BigDecimal.valueOf(21.00),
                 "this is a new book of well-known author",
-                1,
+                Long.valueOf(1),
                 "Old author",
-                4,
+               Long.valueOf(1),
                "");
         return  bookService.createItem(newBook);
     }

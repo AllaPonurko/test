@@ -20,4 +20,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     @Query("select order from Order order where order.createdAt<:currentTime and order.isPayed=false")
     List<Order> findUnpaidOrdersOlderThan(@Param("currentTime") LocalDateTime currentTime);
+
+    @Query("select order from Order order where order.isPayed=false")
+    List<Order> findAllByIsPayedFalse();
 }
+

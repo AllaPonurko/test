@@ -1,9 +1,11 @@
 package org.example.entity.product;
 
 import jakarta.persistence.*;
-import org.example.enums.ProductType;
-import org.example.listener.EntityChangesListener;
+import org.example.entity.dialer.TypeItem;
+import org.example.enums.ProductTypeEnum;
 
+
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -16,24 +18,28 @@ public class Product {
     protected UUID id;
 
     protected String name;
-    protected double price;
+    protected BigDecimal price;
 
     protected String description;
-    protected boolean isAvailable = true;
+    protected boolean isAvailable = false;
     @Enumerated(EnumType.STRING)
-    protected ProductType productType;
-
-
+    protected ProductTypeEnum productType;
+    @ManyToOne
+    protected TypeItem typeItem;
     public Product() {
     }
-
-    public Product(String name, double price, String description) {
+    public Product(String name, BigDecimal price, String description) {
         this.name = name;
         this.price = price;
         this.description = description;
 
     }
-
+    public TypeItem getTypeItem() {
+        return typeItem;
+    }
+    public void setTypeItem(TypeItem typeItem) {
+        this.typeItem = typeItem;
+    }
     public String getName() {
         return name;
     }
@@ -42,19 +48,19 @@ public class Product {
         this.name = name;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public ProductType getProductType() {
+    public ProductTypeEnum getProductType() {
         return productType;
     }
 
-    public void setProductType(ProductType type) {
+    public void setProductType(ProductTypeEnum type) {
         this.productType = type;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

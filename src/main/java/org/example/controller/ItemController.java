@@ -2,9 +2,12 @@ package org.example.controller;
 
 import org.example.dto.BaseReq;
 import org.example.dto.OrderDTO;
+import org.example.entity.dialer.TypeItem;
 import org.example.entity.order.Order;
 import org.example.entity.product.Book;
 import org.example.entity.product.Vendor;
+import org.example.enums.ProductTypeEnum;
+import org.example.repository.TypeItemRepository;
 import org.example.response.BookResponse;
 import org.example.response.ItemsResponse;
 import org.example.response.VendorResponse;
@@ -29,13 +32,15 @@ public class ItemController {
     private final VendorService vendorService;
     private final OrderService orderService;
     private final ProductService productService;
+    private final TypeItemRepository typeItemRepository;
 
     @Autowired
-    public ItemController(BookService bookService, VendorService vendorService, OrderService orderService, ProductService productService) {
+    public ItemController(BookService bookService, VendorService vendorService, OrderService orderService, ProductService productService, TypeItemRepository typeItemRepository) {
         this.bookService = bookService;
         this.vendorService = vendorService;
         this.orderService = orderService;
         this.productService = productService;
+        this.typeItemRepository = typeItemRepository;
         logger.info("ItemController initialized!");
     }
 
@@ -61,8 +66,9 @@ public class ItemController {
 
     @PostMapping("/createItem")
     public ResponseEntity<?> createItem(@RequestBody BaseReq baseReq) throws IOException, ClassNotFoundException {
-        switch (baseReq.productType()) {
-            case 1: {
+        TypeItem typeItem=typeItemRepository.findById((long) baseReq.productType()).orElseThrow();
+        if(typeItem.getEnumValue()== ProductTypeEnum.BOOK) {
+            {
                 try {
                     Book book = bookService.createItem(baseReq);
                     if (book != null) {
@@ -76,7 +82,7 @@ public class ItemController {
                     return ResponseEntity.status(400).body("Failed to create a book" + e.getMessage());
                 }
             }
-            case 2: {
+            if(typeItem.getEnumValue()==ProductTypeEnum.VENDOR){
                 try {
                     if (vendorService.createItem(baseReq) != null)
                         return

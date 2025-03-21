@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "log")
-public class LogOfChanges
+@Table(name = "log_item_changed")
+public class LogItemChanged
 {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -18,7 +18,7 @@ public class LogOfChanges
     private String reason;
     private String type;
 
-    public LogOfChanges(UUID entityId, String name, LocalDateTime timeOfChange, String reason, String type) {
+    public LogItemChanged(UUID entityId, String name, LocalDateTime timeOfChange, String reason, String type) {
         this.entityId = entityId;
         this.name = name;
         this.timeOfChange = timeOfChange;
@@ -26,7 +26,7 @@ public class LogOfChanges
         this.type = type;
     }
 
-    public LogOfChanges() {
+    public LogItemChanged() {
 
     }
 

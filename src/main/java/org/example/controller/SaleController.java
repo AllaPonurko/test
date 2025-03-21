@@ -4,16 +4,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.dto.OrderDetailReq;
 import org.example.dto.OrderReq;
+import org.example.dto.StockItemReq;
 import org.example.entity.order.Order;
 import org.example.entity.order.OrderDetail;
 import org.example.response.OrderResponse;
 import org.example.service.service.OrderDetailService;
 import org.example.service.service.OrderService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -30,8 +28,8 @@ public class SaleController {
     }
 
     @PostMapping("/createOrderDetail")
-    public ResponseEntity<?> createOrderDetail(@RequestBody OrderDetailReq detailDTO) throws IOException, ClassNotFoundException {
-        OrderDetail orderDetail = orderDetailService.createOrderDetail(detailDTO);
+    public ResponseEntity<?> createOrderDetail(@RequestBody OrderDetailReq detailDTO, @RequestParam int warehouseLocation) throws IOException, ClassNotFoundException {
+        OrderDetail orderDetail = orderDetailService.createOrderDetail(detailDTO, warehouseLocation);
         if (orderDetail != null) {
             return ResponseEntity.ok(orderDetail);
         }
@@ -39,14 +37,14 @@ public class SaleController {
     }
 
     @PostMapping("/createOrder")
-    public ResponseEntity<?> createOrder(@RequestBody OrderReq orderReq) throws IOException, ClassNotFoundException {
+    public ResponseEntity<?> createOrder(@RequestBody OrderReq orderReq) throws IOException{
         Order order = orderService.createOrder(orderReq);
         if (order != null) {
             OrderResponse response = new OrderResponse(order.toString(), " was created.");
             LOGGER.info("Order with {} ", order.getId() + " was created successful.");
             return ResponseEntity.ok(response);
         }
-        return ResponseEntity.badRequest().body("");
+        return ResponseEntity.badRequest().body("Order wasn't created");
     }
 
     @DeleteMapping("/deleteOrder")

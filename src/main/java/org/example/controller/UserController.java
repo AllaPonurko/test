@@ -4,6 +4,7 @@ import org.example.dto.UserReq;
 import org.example.entity.user.User;
 import org.example.response.UserResponse;
 import org.example.response.UsersResponse;
+import org.example.service.service.InterestTopicService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,11 @@ import java.util.UUID;
 public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
+    private final InterestTopicService interestTopicService;
     @Autowired
-    public UserController(UserService _userService){
+    public UserController(UserService _userService, InterestTopicService interestTopicService){
         userService=_userService;
+        this.interestTopicService = interestTopicService;
         logger.info("UserController initialized!");
     }
     @GetMapping("/getUser")
@@ -79,6 +82,21 @@ public class UserController {
             return  ResponseEntity.ok().body("User data successfully updated.");
         }
         return ResponseEntity.status(HttpStatus.CONFLICT).body("User data could not be updated.");
+    }
+    @PostMapping("/addTopic")
+    public ResponseEntity addTopic(@RequestParam UUID userUuid,@RequestParam long[] topicIds){
+        if(interestTopicService.addInterestTopicToUser(userUuid,topicIds)){
+            return ResponseEntity.ok("Topics were added successful to user with Id "+userUuid);
+        };
+        return ResponseEntity.status(400).body("For user with Id  "+userUuid+" addition of topic is failed. Topics are already existed.");
+    }
+    @DeleteMapping("/deleteInterestTopic")
+    public ResponseEntity deleteInterestTopic(@RequestParam UUID userUuid,@RequestParam long[] topicIds)
+    {
+        if(interestTopicService.removeInterestTopicFromUser(userUuid,topicIds)){
+            return ResponseEntity.ok("Topics were removed successful from user with Id "+userUuid);
+        }
+        return ResponseEntity.status(400).body("For user with Id  "+userUuid+" removing of topics is failed. Topics aren't exist.");
     }
     @GetMapping("/test")
     public String testEndpoint() {

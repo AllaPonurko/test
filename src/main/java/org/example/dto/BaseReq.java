@@ -1,13 +1,14 @@
 package org.example.dto;
 
 
+import java.math.BigDecimal;
 
 public record BaseReq(String name,
-                      double price,
+                      BigDecimal price,
                       String description,
-                      int productType,
+                      Long productType,
                       String author,
-                      int genre,
+                      Long genre,
                       String country) {
 
 }
