@@ -11,13 +11,14 @@ import org.example.entity.order.OrderWarehouse;
 import org.example.entity.product.Product;
 import org.example.entity.warehouse.StockItem;
 import org.example.entity.warehouse.Warehouse;
-import org.example.enums.TypeOfActionWithStockItemEnum;
-import org.example.enums.TypeOfChangesEnum;
+import org.example.enums.*;
+import org.example.event.EmailSendEvent;
 import org.example.event.StockItemChangedEvent;
 import org.example.repository.OrderWarehouseRepository;
 import org.example.repository.ProductRepository;
 import org.example.repository.StockItemRepository;
 import org.example.repository.WarehouseRepository;
+import org.example.service.notification.BookNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class StockItemService {
     @Autowired
     private final WarehouseRepository warehouseRepository;
     @Autowired
-    private final WarehouseService warehouseService;
+    private final BookNotificationService bookNotificationService;
     private static final Logger LOGGER = LogManager.getLogger();
     @Autowired
     private final ApplicationEventPublisher eventPublisher;
@@ -45,11 +46,11 @@ public class StockItemService {
     private final OrderWarehouseRepository orderWarehouseRepository;
 
 
-    public StockItemService(StockItemRepository stockItemRepository, ProductRepository productRepository, WarehouseRepository warehouseRepository, WarehouseService warehouseService, ApplicationEventPublisher eventPublisher, OrderWarehouseRepository orderWarehouseRepository) {
+    public StockItemService(StockItemRepository stockItemRepository, ProductRepository productRepository, WarehouseRepository warehouseRepository, BookNotificationService bookNotificationService, ApplicationEventPublisher eventPublisher, OrderWarehouseRepository orderWarehouseRepository) {
         this.stockItemRepository = stockItemRepository;
         this.productRepository = productRepository;
         this.warehouseRepository = warehouseRepository;
-        this.warehouseService = warehouseService;
+        this.bookNotificationService = bookNotificationService;
         this.eventPublisher = eventPublisher;
         this.orderWarehouseRepository = orderWarehouseRepository;
     }
@@ -75,7 +76,10 @@ public class StockItemService {
             stockItem.setTotalValue(stockItem.getTotalValue().add(stockItem.getNewTotalValue(product.getPrice(), stockItemReq.quantity())));
         }
         StockItem saveStockItem = stockItemRepository.save(stockItem);
+        product.setAvailable(true);
+        productRepository.save(product);
         eventPublisher.publishEvent(new StockItemChangedEvent(saveStockItem, TypeOfActionWithStockItemEnum.RESTOCK.getValue()));
+        bookNotificationService.sendNotificationToUsers(product);
         return saveStockItem;
     }
 
@@ -123,16 +127,16 @@ public class StockItemService {
                     LOGGER.warn("Not enough stock for product: " + stockItem.getProduct().getId());
                 }
             });
-            if (value == TypeOfChangesEnum.UPDATED_PAYED.getValue()) {
+            if (value == OrderStatusEnum.PAYED.getValue()) {
                 updateStockItemQuantityAfterPay(stockItem, quantity.get());
+                eventPublisher.publishEvent(new StockItemChangedEvent(stockItem, TypeOfActionWithStockItemEnum.WITHDRAW.getValue()));
             }
-            if (value == TypeOfChangesEnum.TIMEOUT_DELETED.getValue()) {
+            if (value == OrderStatusEnum.CANCELLED.getValue()) {
                 updateStockItemQuantityAfterDelete(stockItem, quantity.get());
+                eventPublisher.publishEvent(new StockItemChangedEvent(stockItem, TypeOfActionWithStockItemEnum.RESERVATION_CANCELLATION.getValue()));
             }
             stockItemRepository.save(stockItem);
-            eventPublisher.publishEvent(new StockItemChangedEvent(stockItem, TypeOfActionWithStockItemEnum.WITHDRAW.getValue()));
         });
-
     }
 
     private List<StockItem> getStockItems(Order order) {

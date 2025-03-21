@@ -118,10 +118,9 @@ public class OrderService extends BaseService<Order> implements IProductService<
                             warehouse,order, orderProduct.getQuantity());
                     orderWarehouseRepository.save(orderWarehouse);
                     LOGGER.info("OrderWarehouse with Id {} created successful",orderWarehouse.getId());
-                    eventPublisher.publishEvent(new OrderEvent(orderWarehouse, OrderStatusEnum.PENDING.getValue()));
                 });
                 LOGGER.info("Order with Id {} created successful",order.getId());
-                eventPublisher.publishEvent(new EntityChangedEvent(order, TypeOfChangesEnum.CREATED_BY_USER.getValue()));
+                eventPublisher.publishEvent(new OrderEvent(order, OrderStatusEnum.PENDING.getValue()));
                 return order;
             }
         } catch (Exception e) {
@@ -144,7 +143,7 @@ public class OrderService extends BaseService<Order> implements IProductService<
         boolean isOrderDelete = false;
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isPresent()&&!order.get().isPayed()) {
-            eventPublisher.publishEvent(new EntityChangedEvent(order, TypeOfChangesEnum.MANUAL_DELETED.getValue()));
+            eventPublisher.publishEvent(new OrderEvent(order, OrderStatusEnum.CANCELLED.getValue()));
             orderRepository.delete(order.get());
             LOGGER.info("Order with Id {} deleted successful",order.get().getId());
             isOrderDelete = true;

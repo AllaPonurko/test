@@ -4,7 +4,8 @@ public enum TypeOfActionWithStockItemEnum {
     RESTOCK("RESTOCK"),
     WITHDRAW("WITHDRAW"),
     ZERO_OF_INVENTORY("ZERO_OF_INVENTORY"),
-    RESERVED("RESERVED");
+    RESERVED("RESERVED"),
+    RESERVATION_CANCELLATION("RESERVATION_CANCELLATION");
 
     private String value;
 

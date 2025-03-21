@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.math.BigDecimal;
+
 
 @SpringBootTest(classes = App.class)
 public class BookServiceTest {
@@ -20,11 +22,11 @@ public class BookServiceTest {
         Book mockBook = new Book();
         mockBook.setName("Mock title");
         var newBookreq= new BaseReq("NewBook",
-                21.00,
+                new BigDecimal("21.00"),
                 "this is a new book of well-known author",
-                1,
+                (long)1L,
                 "Old author",
-                4,
+                (long) 4L,
                 "");
         Mockito.when(bookService.createItem(Mockito.any(BaseReq.class))).thenReturn(mockBook);
       Book newBook=bookService.createItem(newBookreq);

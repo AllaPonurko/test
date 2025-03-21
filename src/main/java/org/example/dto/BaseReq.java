@@ -6,9 +6,9 @@ import java.math.BigDecimal;
 public record BaseReq(String name,
                       BigDecimal price,
                       String description,
-                      int productType,
+                      Long productType,
                       String author,
-                      int genre,
+                      Long genre,
                       String country) {
 
 }

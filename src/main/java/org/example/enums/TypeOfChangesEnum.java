@@ -8,7 +8,8 @@ public enum TypeOfChangesEnum {
     CREATED_BY_USER("CREATED_BY_USER"),
     UPDATED_PAYED("UPDATED_PAYED"),
     CREATED_BY_ADMIN("CREATED_BY_ADMIN"),
-    UPDATE_OF_DATA("UPDATE_OF_DATA");
+    UPDATE_OF_DATA("UPDATE_OF_DATA")
+    ;
 
 
     private String value;

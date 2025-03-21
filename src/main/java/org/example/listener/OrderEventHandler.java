@@ -1,7 +1,7 @@
 package org.example.listener;
 
 import org.example.event.OrderEvent;
-import org.example.service.service.LogOrderChangedService;
+import org.example.service.log.LogOrderChangedService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

@@ -11,6 +11,7 @@ import org.example.entity.order.OrderProduct;
 import org.example.entity.product.Product;
 import org.example.enums.TypeOfChangesEnum;
 import org.example.event.EntityChangedEvent;
+import org.example.event.OrderEvent;
 import org.example.repository.OrderDetailRepository;
 import org.example.repository.ProductRepository;
 import org.example.service.interfaces.IProductService;
@@ -84,7 +85,6 @@ public class OrderDetailService extends BaseService<OrderDetail>implements IProd
             }
             try {
                 addEntity(orderDetail, orderDetailRepository);
-                eventPublisher.publishEvent(new EntityChangedEvent(orderDetail, TypeOfChangesEnum.CREATED_BY_USER.getValue()));
                 return orderDetail;
             } catch (Exception e) {
                 e.printStackTrace();

@@ -1,6 +1,7 @@
 package org.example.entity.product;
 
 import jakarta.persistence.*;
+import org.example.entity.dialer.TypeItem;
 import org.example.enums.ProductTypeEnum;
 
 
@@ -20,21 +21,25 @@ public class Product {
     protected BigDecimal price;
 
     protected String description;
-    protected boolean isAvailable = true;
+    protected boolean isAvailable = false;
     @Enumerated(EnumType.STRING)
     protected ProductTypeEnum productType;
-
-
+    @ManyToOne
+    protected TypeItem typeItem;
     public Product() {
     }
-
     public Product(String name, BigDecimal price, String description) {
         this.name = name;
         this.price = price;
         this.description = description;
 
     }
-
+    public TypeItem getTypeItem() {
+        return typeItem;
+    }
+    public void setTypeItem(TypeItem typeItem) {
+        this.typeItem = typeItem;
+    }
     public String getName() {
         return name;
     }

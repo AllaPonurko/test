@@ -8,6 +8,7 @@ import org.example.enums.TypeOfChangesEnum;
 import org.example.event.EntityChangedEvent;
 import org.example.repository.ElectronicsRepository;
 import org.example.repository.ProductRepository;
+import org.example.repository.TypeItemRepository;
 import org.example.repository.VendorRepository;
 import org.example.service.interfaces.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,46 +33,36 @@ public class ProductService<Product> extends BaseService<org.example.entity.prod
     @Autowired
     private final ElectronicsRepository electronicsRepository;
     @Autowired
-    private final VendorRepository vendorRepository;
+    private final TypeItemRepository typeItemRepository;
     @Autowired
     private final ApplicationEventPublisher eventPublisher;
-    public ProductService(ProductRepository productRepository,
-                          ElectronicsRepository electronicsRepository,
-                          VendorRepository vendorRepository, ApplicationEventPublisher eventPublisher){
 
-        this.productRepository=productRepository;
-        this.electronicsRepository=electronicsRepository;
-        this.vendorRepository = vendorRepository;
+    public ProductService(ProductRepository productRepository,
+                          ElectronicsRepository electronicsRepository, TypeItemRepository typeItemRepository,
+                          ApplicationEventPublisher eventPublisher) {
+
+        this.productRepository = productRepository;
+        this.electronicsRepository = electronicsRepository;
+        this.typeItemRepository = typeItemRepository;
         this.eventPublisher = eventPublisher;
     }
+
     @Transactional
     public org.example.entity.product.Product createItem(BaseReq baseReq) throws IOException, ClassNotFoundException {
-        if(!baseReq.name().isEmpty() && !(baseReq.price() !=null)&&!(baseReq.productType()==0)){
+        if (!baseReq.name().isEmpty() && !(baseReq.price() != null) && !(baseReq.productType() == 0)) {
             org.example.entity.product.Product product = new org.example.entity.product.Product(baseReq.name(), baseReq.price(),
                     baseReq.description());
-            int kod=baseReq.productType();
-            switch ( kod){
-                case 1:
-                    product.setProductType(ProductTypeEnum.BOOK);
-                    break;
-                case 2:
-                    product.setProductType(ProductTypeEnum.VENDOR);
-                    break;
-                case 3:
-                    product.setProductType(ProductTypeEnum.ELECTRONIC);
-                    break;
-                default:
-                    product.setProductType(ProductTypeEnum.PRODUCT);
-                    break;
-            }
-            product.setAvailable(true);
+            var type =typeItemRepository.findById(Long.valueOf(baseReq.productType())) ;
+            product.setProductType(type.get().getEnumValue());
+            product.setTypeItem(type.get());
+            product.setAvailable(false);
             try {
-                addEntity( product,  productRepository);
+                addEntity(product, productRepository);
                 eventPublisher.publishEvent(new EntityChangedEvent(product, TypeOfChangesEnum.CREATED_BY_ADMIN.getValue()));
                 return product;
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new RuntimeException("Error saving book data to file: " + e.getMessage());
+                throw new RuntimeException("Error saving item data to db: " + e.getMessage());
             }
         }
         return null;
@@ -79,13 +70,13 @@ public class ProductService<Product> extends BaseService<org.example.entity.prod
 
     public Optional<Product> findProductById(String id) {
 
-            return Optional.empty();
+        return Optional.empty();
 
     }
 
     public List<Electronic> findByBrand(String vendorIdString) {
-        try{
-        UUID vendorId = UUID.fromString(vendorIdString);
+        try {
+            UUID vendorId = UUID.fromString(vendorIdString);
             return electronicsRepository.findByVendorId(vendorId);
         } catch (IllegalArgumentException e) {
             return List.of();

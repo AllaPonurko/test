@@ -4,7 +4,7 @@ public enum OrderStatusEnum {
     PENDING("PENDING"), // Очікується
     COMPLETED("COMPLETED"), // Виконано
     CANCELLED("CANCELLED"), // Скасовано
-    PAYED ("PAYED")// Відправлено
+    PAYED ("PAYED")// Сплачено
     ;
     private String value;
 

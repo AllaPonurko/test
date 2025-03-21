@@ -4,8 +4,10 @@ import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.entity.order.Order;
+import org.example.enums.OrderStatusEnum;
 import org.example.enums.TypeOfChangesEnum;
 import org.example.event.EntityChangedEvent;
+import org.example.event.OrderEvent;
 import org.example.repository.OrderRepository;
 import org.example.repository.OrderWarehouseRepository;
 import org.example.repository.StockItemRepository;
@@ -48,8 +50,8 @@ public class PayService {
             if (simulatePayment()) {
                 order.setPayed(true);
                 orderRepository.save(order);
-                stockItemService.withdrawProductAfterPayOrDelete(order,TypeOfChangesEnum.UPDATED_PAYED.getValue());
-                eventPublisher.publishEvent(new EntityChangedEvent(order, TypeOfChangesEnum.UPDATED_PAYED.getValue()));
+                stockItemService.withdrawProductAfterPayOrDelete(order, OrderStatusEnum.PAYED.getValue());
+                eventPublisher.publishEvent(new OrderEvent(order, OrderStatusEnum.PAYED.getValue()));
                 LOGGER.info("Order " + orderId + " was paid successfully (simulated).");
                 return true;
             } else {
@@ -66,7 +68,7 @@ public class PayService {
      * @return
      */
     private boolean simulatePayment() {
-        double random = 0.8 + Math.random();
+        double random = 0.6 + Math.random();
         return random > 0.8;
     }
 }

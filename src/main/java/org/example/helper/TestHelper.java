@@ -20,9 +20,9 @@ public class TestHelper {
        var newBook= new BaseReq("NewBook",
                BigDecimal.valueOf(21.00),
                 "this is a new book of well-known author",
-                1,
+                Long.valueOf(1),
                 "Old author",
-                4,
+               Long.valueOf(1),
                "");
         return  bookService.createItem(newBook);
     }

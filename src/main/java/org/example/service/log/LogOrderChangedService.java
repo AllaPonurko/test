@@ -1,4 +1,4 @@
-package org.example.service.service;
+package org.example.service.log;
 
 import jakarta.transaction.Transactional;
 import org.example.entity.log.LogOrderChanged;
@@ -6,6 +6,7 @@ import org.example.entity.order.Order;
 import org.example.enums.OrderStatusEnum;
 import org.example.enums.TypeOfChangesEnum;
 import org.example.repository.LogOrderChangedRepository;
+import org.example.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,14 +14,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class LogOrderChangedService {
     @Autowired
     private final LogOrderChangedRepository orderWarehouseRepository;
+    @Autowired
+    private final OrderRepository orderRepository;
 
-    public LogOrderChangedService(LogOrderChangedRepository orderWarehouseRepository) {
+    public LogOrderChangedService(LogOrderChangedRepository orderWarehouseRepository, OrderRepository orderRepository) {
         this.orderWarehouseRepository = orderWarehouseRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Transactional
@@ -47,8 +52,9 @@ public class LogOrderChangedService {
     private LogOrderChanged createLogOrderChanged(Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         if (object != null) {
             LogOrderChanged logOrderChanged = new LogOrderChanged();
-            Method getOrder = object.getClass().getMethod("getOrder");
-            Order order = (Order) getOrder.invoke(object);
+            Method getOrder = object.getClass().getMethod("getId");
+            UUID orderId=(UUID) getOrder.invoke(object);
+            Order order = orderRepository.findById(orderId).orElseThrow();
             logOrderChanged.setOrder(order);
             Method getTotalPrice = order.getClass().getMethod("getTotalPrice");
             logOrderChanged.setTotalPrice((BigDecimal) getTotalPrice.invoke(order)) ;
